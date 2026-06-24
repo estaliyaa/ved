@@ -35,55 +35,66 @@ These are product constraints, enforced in `tailwind.config.ts`:
 
 ## Structure
 
-The product is a **single AI-chat screen** — there are no module pages/sub-routes.
-Everything happens inside the chat. Only `/` exists.
+**Module-based app, floating-card layout.** A compact `TopHeader` (just the VED logo)
+sits on the gray page bg; a transparent `ModuleSidebar` switches the main area, which is
+a **white rounded card**. A fixed bottom-right gradient **«Спросить ИИ»** launcher opens
+the AI. State in `AppShell` (in-memory, no routing — only `/`).
 
 ```
 src/
   app/
     layout.tsx            Root: Open Sans, <html lang="ru">
-    globals.css           Design tokens (HSL CSS vars) + base styles
-    page.tsx              "/" — renders <ChatShell>
+    globals.css           Design tokens. --background is gray so white cards float
+    page.tsx              "/" — renders <AppShell>
   components/
-    chat/
-      chat-context.tsx    "use client" ChatProvider + useChat(): conversations,
-                          activeId, newChat/selectConversation/startScenario/sendMessage.
-                          Holds seeded demo history. No real backend yet.
-      chat-shell.tsx      ChatProvider + flex(ChatSidebar + ChatMain)
-      chat-sidebar.tsx    New chat · search · «Закреплённые диалоги» · «История
-                          предыдущих запросов» · profile footer. Items pin/unpin.
-      chat-main.tsx       Header, welcome|thread, ChatInput. Welcome: input is the
-                          centered hero with cards below; thread: input bottom-pinned.
-                          When the active conversation has a `detail` (товар determined),
-                          splits into [narrow chat (w-400) | ProductDetailPanel].
-      chat-welcome.tsx    Logo + "VED Чат" + centered input slot + the 6 scenario cards
-      scenario-card.tsx   One scenario card
-      message-thread.tsx  Conversation (user bubble / assistant + avatar), typing dots,
-                          and «Что дальше?» follow-up chips after the latest answer
-      product-detail-panel.tsx  Right-side товар card: breadcrumb, summary, note banner,
-                          stat cards, top-countries/importers bars, yearly chart, shipments
-      chat-input.tsx      Rounded input + mic + Отправить (large + placeholder props)
-    brand/ved-logo.tsx    Brand mark
+    app/
+      app-shell.tsx       TopHeader + [ModuleSidebar | white main card] + bottom-right AI
+                          popup/launcher. Holds activeId + popupOpen + useAssistant().
+      top-header.tsx      Compact: Adata logo only (no text)
+      module-sidebar.tsx  Transparent nav (module icons kept) + Adata account footer
+      under-development.tsx  Illustration + «Модуль в разработке» + «Спросить ИИ» CTA
+    product/              «Анализ товара» module
+      product-analysis-module.tsx  view state (search|results|detail) + breadcrumb
+      product-search.tsx  Top search bar + horizontal recent + <TnVedTree>
+      tn-ved-tree.tsx     Multi-level ТН ВЭД tree (config/tnved.ts); leaf → opens product
+      product-results.tsx · product-card.tsx  Result cards (ТН ВЭД code + name emphasized)
+      product-detail.tsx  Hero (+ «Спросить ИИ») + 4 collapsible blocks
+      data-bits.tsx       "use client". SectionCard = accordion dropdown; StatCard (no
+                          truncation), BarList, YearBars, SimpleTable, …
+    calculator/calculator-module.tsx  Multi-item payments calculator (config/calculator.ts)
+    chat/                 AI assistant (one shared assistant; popup + ИИ Чат module)
+      use-assistant.ts    Hook: messages/typing + askFromPopup (classify→navigate|escalate),
+                          askInChat (always rich), reset. Mock classify + replies.
+      ai-assistant-popup.tsx  Bottom-right popup widget (entry point)
+      ai-chat-module.tsx  Full-page «ИИ Чат» module (shares the conversation)
+      chat-messages.tsx   Renderer: bold/bullets, copy/like/dislike, typing dots
+    brand/  ved-logo.tsx (VED mark) · adata-logo.tsx (Adata monogram — PLACEHOLDER)
     ui/                   ShadCN-style primitives (button, …)
   config/
-    scenarios.ts          The 6 chat scenarios (icon, title, description, opening msg)
+    modules.ts            10 sidebar modules (kind: chat | product | calculator | dev)
+    products.ts           ProductSummary/ProductDetail, CATALOG, searchProducts,
+                          productByCode, buildProductDetail (mock)
+    tnved.ts              ТН ВЭД tree + TNVED_STATS (mock)
+    calculator.ts         procedures/countries/types/currencies + calculate() (mock)
   lib/utils.ts            cn()
 ```
 
 ## Architecture notes
 
-- **Pure AI-chat, no modules.** The sidebar is search + chat history (ChatGPT/Claude
-  style), not module nav. Scenarios (Анализ товара, Проверка импортера, Карта
-  импортера, Калькулятор, Околотаможенная сфера, Отслеживание контейнера) are *chat
-  scenarios*, not pages: clicking a card calls `startScenario`, which creates a new
-  conversation seeded with the scenario's opening assistant message.
-- **State** lives in `ChatProvider` (in-memory, client-only). History is seeded demo
-  data. `sendMessage` appends the user message + (after a `TYPING_DELAY` «печатает…»
-  pause via `replyAfterDelay`) a placeholder assistant reply —
-  `chat-context.tsx` (`DEMO_REPLY` / `sendMessage`) is where real intent→data-source→
-  tool routing and LLM responses will attach.
-- **Товар detail panel.** When a товар is determined — in the `product-analysis`
-  scenario, on the user's message — `sendMessage` attaches a `ProductDetail`
-  (`buildProductDetail`, mock data) to the conversation. `chat-main` then shows the
-  split layout. Trigger/data is mock; extend `buildProductDetail` (or add detail to
-  other scenarios) when wiring real sources.
+- **Layout:** transparent sidebar (module icons kept) on the gray page; main content =
+  white rounded card. The header shows only the Adata logo.
+- **Modules** (`config/modules.ts`): `ИИ Чат` (`chat`), `Анализ товара` (`product`) and
+  `Калькулятор` (`calculator`) are built; the other 7 are `dev` → `UnderDevelopment`.
+- **AI = one shared assistant** (`chat/use-assistant.ts`). Entry point = bottom-right
+  **popup** (`ai-assistant-popup.tsx`) opened by the launcher. Simple Qs → popup answers +
+  navigates to the right module; complex Qs → escalate to the **ИИ Чат** module
+  (`ai-chat-module.tsx`) with the Q + rich answer. Popup and module share one conversation.
+- **Анализ товара**: search bar → `searchProducts` → cards → product page; OR browse the
+  `TnVedTree` and click a leaf (`productByCode` → product page). Mock data in
+  `config/products.ts` / `config/tnved.ts`. Product page blocks are accordions.
+- **Калькулятор**: add multiple товары → `calculate()` → totals. Mock formula
+  (duty 5%, fee 20 000 ₸, VAT 12%; no FX conversion).
+- **AI panel** (`chat/ai-panel.tsx`): `ChatProvider` + `ChatMain`. Seeded demo;
+  `DEMO_REPLY`/`sendMessage` in `chat-context.tsx` is where real LLM/tool routing attaches.
+- **Adata logo** (`brand/adata-logo.tsx`) is a PLACEHOLDER monogram — swap for the real
+  asset when available (Figma Dev Mode MCP wasn't reachable headless).

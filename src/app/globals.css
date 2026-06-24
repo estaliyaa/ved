@@ -5,7 +5,7 @@
 @layer base {
   :root {
     /* Surfaces */
-    --background: 228 40% 97%; /* soft lavender-gray page */
+    --background: 225 25% 94%; /* cool light-gray page (cards float on it) */
     --foreground: 222 33% 12%; /* near-black slate */
 
     --card: 0 0% 100%;
