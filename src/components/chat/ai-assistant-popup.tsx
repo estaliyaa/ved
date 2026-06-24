@@ -61,7 +61,7 @@ export function AiAssistantPopup({
   return (
     <div className="fixed bottom-6 right-6 z-50 flex h-[660px] max-h-[calc(100vh-5rem)] w-[440px] flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl shadow-foreground/15 animate-fade-in-up">
       <header className="flex items-center gap-3 border-b border-border px-4 py-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#068DFF] to-[#0463b3] text-white">
           <Sparkles className="h-5 w-5" />
         </span>
         <div className="flex min-w-0 flex-1 flex-col">
@@ -140,7 +140,7 @@ export function AiAssistantPopup({
           type="submit"
           disabled={value.trim().length === 0}
           aria-label="Отправить"
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#068DFF] to-[#0463b3] text-white transition-opacity hover:opacity-90 disabled:opacity-50"
         >
           <ArrowUp className="h-5 w-5" />
         </button>

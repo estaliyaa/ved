@@ -287,8 +287,34 @@ const POPUP_GREETING: AssistantMessage = {
   id: "pg",
   role: "assistant",
   kind: "text",
-  content: "Здравствуйте! Чем могу помочь по ВЭД?",
+  content:
+    "Ищете определённый товар? Помогу подобрать код ТН ВЭД, проверить ограничения, рассчитать платежи и отследить контейнер.",
 };
+
+export type ChatHistoryItem = {
+  id: string;
+  title: string;
+  messages: AssistantMessage[];
+};
+
+function seedHistory(): ChatHistoryItem[] {
+  const mk = (title: string): ChatHistoryItem => ({
+    id: uid(),
+    title,
+    messages: [user(title), buildChatAnswer(title)],
+  });
+  return [
+    mk("Отследить контейнер MSCU7263514"),
+    mk("Проверь ТОО «Чайный Дом Алматы»"),
+    mk("Какие документы нужны для импорта оборудования?"),
+  ];
+}
+
+function titleOf(messages: AssistantMessage[]): string {
+  const firstUser = messages.find((m) => m.role === "user");
+  const t = firstUser?.content ?? "Без названия";
+  return t.length > 40 ? `${t.slice(0, 40)}…` : t;
+}
 
 export function useAssistant({
   onOpenChat,
@@ -302,6 +328,7 @@ export function useAssistant({
   const [popupTyping, setPopupTyping] = useState(false);
   const [chatTyping, setChatTyping] = useState(false);
   const [productDetail, setProductDetail] = useState<ProductDetail | null>(null);
+  const [chatHistory, setChatHistory] = useState<ChatHistoryItem[]>(seedHistory);
 
   const askInChat = useCallback((text: string) => {
     const t = text.trim();
@@ -353,10 +380,29 @@ export function useAssistant({
   const closeProduct = useCallback(() => setProductDetail(null), []);
 
   const resetChat = useCallback(() => {
-    setChatMessages([]);
+    setChatMessages((prev) => {
+      if (prev.length > 0) {
+        setChatHistory((h) => [
+          { id: uid(), title: titleOf(prev), messages: prev },
+          ...h,
+        ]);
+      }
+      return [];
+    });
     setChatTyping(false);
     setProductDetail(null);
   }, []);
+
+  const loadChat = useCallback(
+    (id: string) => {
+      const item = chatHistory.find((c) => c.id === id);
+      if (!item) return;
+      setProductDetail(null);
+      setChatTyping(false);
+      setChatMessages(item.messages);
+    },
+    [chatHistory]
+  );
 
   return {
     popupMessages,
@@ -364,10 +410,12 @@ export function useAssistant({
     popupTyping,
     chatTyping,
     productDetail,
+    chatHistory,
     askFromPopup,
     askInChat,
     escalate,
     closeProduct,
     resetChat,
+    loadChat,
   };
 }

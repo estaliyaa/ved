@@ -1,7 +1,14 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Globe, Scale, ShieldAlert, Sparkles, SquareStack } from "lucide-react";
+import {
+  Globe,
+  ListTree,
+  Scale,
+  ShieldAlert,
+  Sparkles,
+  SquareStack,
+} from "lucide-react";
 
 import {
   BarList,
@@ -16,6 +23,7 @@ import {
 } from "@/components/product/data-bits";
 import { Button } from "@/components/ui/button";
 import type { ProductDetail as ProductDetailType } from "@/config/products";
+import { findTnVedPath } from "@/config/tnved";
 import { cn } from "@/lib/utils";
 
 const TABS = [
@@ -23,6 +31,7 @@ const TABS = [
   { id: "sanctions", title: "Санкционные ограничения" },
   { id: "trade", title: "ВЭД по товару" },
   { id: "market", title: "Международный рынок и тарифы" },
+  { id: "tree", title: "Дерево ТН ВЭД" },
 ] as const;
 
 function LabeledBlock({
@@ -43,10 +52,13 @@ function LabeledBlock({
 export function ProductDetail({
   detail,
   onAskAi,
+  onOpenCode,
 }: {
   detail: ProductDetailType;
   onAskAi: () => void;
+  onOpenCode?: (hsCode: string, title?: string) => void;
 }) {
+  const path = findTnVedPath(detail.hsCode);
   const [openIds, setOpenIds] = useState<Set<string>>(() => new Set(["code"]));
   const [activeTab, setActiveTab] = useState<string>("code");
   const refs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -128,7 +140,7 @@ export function ProductDetail({
 
       {/* Sections */}
       <div className="px-8 py-6">
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-3">
           <div
             ref={(el) => {
               refs.current.code = el;
@@ -292,6 +304,99 @@ export function ProductDetail({
               </div>
             </SectionCard>
           </div>
+
+          {/* 5. Дерево ТН ВЭД — ветка товара */}
+          <div
+            ref={(el) => {
+              refs.current.tree = el;
+            }}
+            className="scroll-mt-20"
+          >
+            <SectionCard
+              icon={ListTree}
+              title="Дерево ТН ВЭД"
+              {...sectionProps("tree")}
+            >
+              {path.length > 0 ? (
+                <ol className="flex flex-col">
+                  {path.map((n, i) => {
+                    const isLast = i === path.length - 1;
+                    const label = n.label ?? n.code;
+                    return (
+                      <li
+                        key={i}
+                        className="relative flex gap-3 pb-3 last:pb-0"
+                        style={{ marginLeft: `${i * 16}px` }}
+                      >
+                        {!isLast && (
+                          <span className="absolute left-3 top-7 h-full w-px bg-border" />
+                        )}
+                        <span
+                          className={cn(
+                            "relative flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold",
+                            isLast
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-muted text-muted-foreground"
+                          )}
+                        >
+                          {i + 1}
+                        </span>
+                        <div className="flex min-w-0 flex-1 flex-col">
+                          <div className="flex flex-wrap items-center gap-2">
+                            {label && (
+                              <span className="rounded-md bg-muted px-2 py-1 font-mono text-xs font-bold text-foreground">
+                                {label}
+                              </span>
+                            )}
+                            {isLast && (
+                              <span className="rounded-md bg-accent px-2 py-1 font-mono text-xs font-bold text-primary">
+                                {detail.hsCode}
+                              </span>
+                            )}
+                          </div>
+                          <span
+                            className={cn(
+                              "mt-1 text-sm",
+                              isLast
+                                ? "font-semibold text-foreground"
+                                : "text-muted-foreground"
+                            )}
+                          >
+                            {n.title}
+                          </span>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ol>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Положение в дереве ТН ВЭД недоступно для этого кода.
+                </p>
+              )}
+            </SectionCard>
+          </div>
+        </div>
+
+        {/* Триггер ИИ-ассистента */}
+        <div className="mt-6 flex flex-col items-start gap-4 rounded-2xl border border-primary/30 bg-accent/40 p-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#068DFF] to-[#0463b3] text-white">
+              <Sparkles className="h-5 w-5" />
+            </span>
+            <div>
+              <p className="text-sm font-semibold text-foreground">
+                Не разобрались? Помогу проанализировать
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Спросите ассистента про код, пошлины, ограничения или поставки
+              </p>
+            </div>
+          </div>
+          <Button onClick={onAskAi} className="shrink-0 rounded-full">
+            <Sparkles />
+            Спросить ИИ
+          </Button>
         </div>
       </div>
     </div>

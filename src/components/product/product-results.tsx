@@ -11,12 +11,12 @@ export function ProductResults({
   onOpen: (product: ProductSummary) => void;
 }) {
   return (
-    <div className="px-8 py-8">
+    <div className="px-8 pb-8 pt-4">
       <div className="animate-fade-in-up">
-        <p className="mb-5 text-sm text-muted-foreground">
+        <p className="mb-4 text-sm text-muted-foreground">
           Найдено: {results.length} · по запросу «{query}»
         </p>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-3">
           {results.map((product) => (
             <ProductCard
               key={product.hsCode}

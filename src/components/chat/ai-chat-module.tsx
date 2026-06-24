@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   ArrowUp,
   Barcode,
+  Clock,
   FileText,
   Package,
   RotateCcw,
@@ -13,10 +14,16 @@ import {
   Sparkles,
 } from "lucide-react";
 
+import { ChatHistoryPanel } from "@/components/chat/chat-history-panel";
 import { ChatMessages } from "@/components/chat/chat-messages";
 import { ChatProductPanel } from "@/components/chat/chat-product-panel";
-import type { AssistantMessage, Cta } from "@/components/chat/use-assistant";
+import type {
+  AssistantMessage,
+  ChatHistoryItem,
+  Cta,
+} from "@/components/chat/use-assistant";
 import type { ProductDetail } from "@/config/products";
+import { cn } from "@/lib/utils";
 
 const QUICK = [
   { icon: Ship, label: "Отследить контейнер", prompt: "Отследить контейнер MSCU7263514" },
@@ -31,20 +38,25 @@ export function AiChatModule({
   messages,
   typing,
   productDetail,
+  history,
   onAsk,
   onOpenModule,
   onCloseProduct,
   onReset,
+  onLoadChat,
 }: {
   messages: AssistantMessage[];
   typing: boolean;
   productDetail: ProductDetail | null;
+  history: ChatHistoryItem[];
   onAsk: (text: string) => void;
   onOpenModule: (moduleId: string) => void;
   onCloseProduct: () => void;
   onReset: () => void;
+  onLoadChat: (id: string) => void;
 }) {
   const [value, setValue] = useState("");
+  const [historyOpen, setHistoryOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -70,16 +82,31 @@ export function AiChatModule({
         <h1 className="text-lg font-bold tracking-tight text-foreground">
           ИИ Чат
         </h1>
-        {!empty && (
+        <div className="ml-auto flex items-center gap-2">
           <button
             type="button"
-            onClick={onReset}
-            className="ml-auto flex h-9 items-center gap-2 rounded-full border border-border px-4 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            onClick={() => setHistoryOpen((o) => !o)}
+            className={cn(
+              "flex h-9 items-center gap-2 rounded-full border border-border px-4 text-sm font-medium transition-colors",
+              historyOpen
+                ? "bg-accent text-primary"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground"
+            )}
           >
-            <RotateCcw className="h-4 w-4" />
-            Новый чат
+            <Clock className="h-4 w-4" />
+            История
           </button>
-        )}
+          {!empty && (
+            <button
+              type="button"
+              onClick={onReset}
+              className="flex h-9 items-center gap-2 rounded-full border border-border px-4 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              <RotateCcw className="h-4 w-4" />
+              Новый чат
+            </button>
+          )}
+        </div>
       </header>
 
       <div className="flex flex-1 overflow-hidden">
@@ -88,7 +115,7 @@ export function AiChatModule({
             {empty ? (
               <div className="flex min-h-full flex-col items-center justify-center">
                 <div className="flex w-full max-w-2xl flex-col items-center gap-6 text-center animate-fade-in-up">
-                  <span className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white">
+                  <span className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-[#068DFF] to-[#0463b3] text-white">
                     <Sparkles className="h-8 w-8" />
                   </span>
                   <div className="flex flex-col gap-2">
@@ -186,9 +213,18 @@ export function AiChatModule({
           )}
         </div>
 
-        {productDetail && (
+        {productDetail ? (
           <ChatProductPanel detail={productDetail} onClose={onCloseProduct} />
-        )}
+        ) : historyOpen ? (
+          <ChatHistoryPanel
+            items={history}
+            onSelect={(id) => {
+              onLoadChat(id);
+              setHistoryOpen(false);
+            }}
+            onClose={() => setHistoryOpen(false)}
+          />
+        ) : null}
       </div>
     </div>
   );

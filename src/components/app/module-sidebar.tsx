@@ -24,14 +24,14 @@ export function ModuleSidebar({
     >
       <div
         className={cn(
-          "mb-4 flex items-center border-b border-border pb-4",
+          "flex h-16 shrink-0 items-center border-b border-border",
           collapsed ? "justify-center" : "px-2"
         )}
       >
         <AdataLogo compact={collapsed} />
       </div>
 
-      <nav className="w-full flex-1 overflow-y-auto">
+      <nav className="w-full flex-1 overflow-y-auto pt-3">
         <ul className="flex flex-col gap-1">
           {modules.map((m) => {
             const isActive = m.id === activeId;
@@ -70,7 +70,7 @@ export function ModuleSidebar({
           collapsed ? "mx-auto w-12 justify-center px-0 py-2" : "w-full gap-3 px-2 py-2"
         )}
       >
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-blue-700 text-xs font-semibold text-primary-foreground">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#068DFF] to-[#0463b3] text-xs font-semibold text-primary-foreground">
           АД
         </span>
         {!collapsed && (

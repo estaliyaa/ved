@@ -3,22 +3,77 @@ export type TnVedNode = {
   code?: string; // «0902»
   title: string;
   range?: string; // «06–14»
-  productHsCode?: string; // лист → открывает страницу товара (код из каталога)
+  productHsCode?: string; // лист каталога (точные данные товара)
   children?: TnVedNode[];
 };
 
 export const TNVED_STATS = { active: 21122, total: 21136 };
 
-/** Демо-дерево ТН ВЭД (несколько уровней). Листья с productHsCode ведут на товар. */
+/** Путь по дереву до товара (для блока «Дерево ТН ВЭД» на странице товара). */
+export function findTnVedPath(hsCode: string): TnVedNode[] {
+  const target = hsCode.trim();
+  let found: TnVedNode[] = [];
+  const dfs = (nodes: TnVedNode[], trail: TnVedNode[]): boolean => {
+    for (const n of nodes) {
+      const t = [...trail, n];
+      if (n.productHsCode === target || n.code === target) {
+        found = t;
+        return true;
+      }
+      if (n.children && dfs(n.children, t)) return true;
+    }
+    return false;
+  };
+  dfs(tnvedTree, []);
+  return found;
+}
+
+/**
+ * Демо-дерево ТН ВЭД. Каждая ветка ≥ 3 уровней; последний уровень (без детей)
+ * открывает страницу товара (точные данные для кодов каталога, иначе синтез).
+ */
 export const tnvedTree: TnVedNode[] = [
   {
     label: "Раздел I",
     range: "01–05",
     title: "Живые животные; продукты животного происхождения",
     children: [
-      { code: "01", title: "Живые животные" },
-      { code: "02", title: "Мясо и пищевые мясные субпродукты" },
-      { code: "04", title: "Молочная продукция; яйца; мёд" },
+      {
+        code: "02",
+        title: "Мясо и пищевые мясные субпродукты",
+        children: [
+          {
+            code: "0201",
+            title: "Мясо крупного рогатого скота, свежее или охлаждённое",
+            children: [
+              { code: "0201 10", title: "Туши и полутуши" },
+              { code: "0201 30", title: "Бескостное мясо" },
+            ],
+          },
+          {
+            code: "0207",
+            title: "Мясо и субпродукты домашней птицы",
+            children: [
+              { code: "0207 12", title: "Тушки кур, замороженные" },
+              { code: "0207 14", title: "Части тушек кур, замороженные" },
+            ],
+          },
+        ],
+      },
+      {
+        code: "04",
+        title: "Молочная продукция; яйца; мёд",
+        children: [
+          {
+            code: "0406",
+            title: "Сыры и творог",
+            children: [
+              { code: "0406 10", title: "Молодые сыры, творог" },
+              { code: "0406 90", title: "Сыры прочие" },
+            ],
+          },
+        ],
+      },
     ],
   },
   {
@@ -29,6 +84,16 @@ export const tnvedTree: TnVedNode[] = [
       {
         code: "08",
         title: "Съедобные фрукты и орехи; кожура цитрусовых",
+        children: [
+          {
+            code: "0805",
+            title: "Цитрусовые плоды, свежие или сушёные",
+            children: [
+              { code: "0805 10", title: "Апельсины" },
+              { code: "0805 50", title: "Лимоны и лаймы" },
+            ],
+          },
+        ],
       },
       {
         code: "09",
@@ -73,7 +138,20 @@ export const tnvedTree: TnVedNode[] = [
           },
         ],
       },
-      { code: "10", title: "Злаки" },
+      {
+        code: "10",
+        title: "Злаки",
+        children: [
+          {
+            code: "1006",
+            title: "Рис",
+            children: [
+              { code: "1006 30", title: "Рис полуобрушенный или обрушенный" },
+              { code: "1006 40", title: "Рис дроблёный" },
+            ],
+          },
+        ],
+      },
     ],
   },
   {
@@ -98,7 +176,20 @@ export const tnvedTree: TnVedNode[] = [
           },
         ],
       },
-      { code: "22", title: "Алкогольные и безалкогольные напитки, уксус" },
+      {
+        code: "22",
+        title: "Алкогольные и безалкогольные напитки, уксус",
+        children: [
+          {
+            code: "2202",
+            title: "Воды и безалкогольные напитки",
+            children: [
+              { code: "2202 10", title: "Воды с добавлением сахара" },
+              { code: "2202 99", title: "Прочие безалкогольные напитки" },
+            ],
+          },
+        ],
+      },
     ],
   },
   {
@@ -106,8 +197,31 @@ export const tnvedTree: TnVedNode[] = [
     range: "28–38",
     title: "Продукция химической и связанных отраслей промышленности",
     children: [
-      { code: "30", title: "Фармацевтическая продукция" },
-      { code: "33", title: "Эфирные масла; парфюмерия и косметика" },
+      {
+        code: "33",
+        title: "Эфирные масла; парфюмерия и косметика",
+        children: [
+          {
+            code: "3304",
+            title: "Косметические средства и средства для макияжа",
+            children: [
+              { code: "3304 99", title: "Средства по уходу за кожей" },
+              { code: "3304 20", title: "Средства для макияжа глаз" },
+            ],
+          },
+        ],
+      },
+      {
+        code: "34",
+        title: "Мыло, моющие средства, свечи",
+        children: [
+          {
+            code: "3401",
+            title: "Мыло и поверхностно-активные средства",
+            children: [{ code: "3401 11", title: "Мыло туалетное" }],
+          },
+        ],
+      },
     ],
   },
   {
@@ -128,6 +242,7 @@ export const tnvedTree: TnVedNode[] = [
                 title: "Портативные компьютеры (ноутбуки) ≤ 10 кг",
                 productHsCode: "8471 30 000 0",
               },
+              { code: "8471 41", title: "Вычислительные машины настольные" },
             ],
           },
         ],
@@ -145,6 +260,7 @@ export const tnvedTree: TnVedNode[] = [
                 title: "Смартфоны",
                 productHsCode: "8517 13 000 0",
               },
+              { code: "8517 62", title: "Аппаратура приёма и передачи данных" },
             ],
           },
         ],
@@ -156,8 +272,31 @@ export const tnvedTree: TnVedNode[] = [
     range: "50–63",
     title: "Текстильные материалы и текстильные изделия",
     children: [
-      { code: "52", title: "Хлопок" },
-      { code: "61", title: "Одежда трикотажная машинного или ручного вязания" },
+      {
+        code: "61",
+        title: "Одежда трикотажная машинного или ручного вязания",
+        children: [
+          {
+            code: "6109",
+            title: "Майки, фуфайки и прочие нательные изделия",
+            children: [
+              { code: "6109 10", title: "Из хлопка" },
+              { code: "6109 90", title: "Из прочих текстильных материалов" },
+            ],
+          },
+        ],
+      },
+      {
+        code: "62",
+        title: "Одежда текстильная, кроме трикотажной",
+        children: [
+          {
+            code: "6203",
+            title: "Костюмы, комплекты, пиджаки мужские",
+            children: [{ code: "6203 42", title: "Брюки из хлопка" }],
+          },
+        ],
+      },
     ],
   },
 ];

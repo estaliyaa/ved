@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 export function TnVedTree({
   onOpenProduct,
 }: {
-  onOpenProduct: (hsCode: string) => void;
+  onOpenProduct: (hsCode: string, title?: string) => void;
 }) {
   const pct = (TNVED_STATS.active / TNVED_STATS.total) * 100;
   return (
@@ -59,16 +59,16 @@ function TreeNode({
 }: {
   node: TnVedNode;
   depth: number;
-  onOpenProduct: (hsCode: string) => void;
+  onOpenProduct: (hsCode: string, title?: string) => void;
 }) {
   const [open, setOpen] = useState(false);
   const hasChildren = !!node.children?.length;
-  const isLeaf = !!node.productHsCode;
+  const isLeaf = !hasChildren; // последний уровень всегда открывает товар
   const badge = node.label ?? node.code;
 
   function handleClick() {
-    if (isLeaf) onOpenProduct(node.productHsCode!);
-    else if (hasChildren) setOpen((o) => !o);
+    if (isLeaf) onOpenProduct(node.productHsCode ?? node.code ?? "", node.title);
+    else setOpen((o) => !o);
   }
 
   return (

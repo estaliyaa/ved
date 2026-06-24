@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Sparkles } from "lucide-react";
 
 import { ModuleSidebar } from "@/components/app/module-sidebar";
@@ -29,6 +29,21 @@ export function AppShell() {
     setPopupOpen(false);
   };
 
+  // После входа ассистент сам предлагает помощь (через 6–8 сек).
+  const greeted = useRef(false);
+  useEffect(() => {
+    const t = setTimeout(() => {
+      if (!greeted.current) {
+        greeted.current = true;
+        setActiveId((cur) => {
+          if (cur !== "ai-chat") setPopupOpen(true);
+          return cur;
+        });
+      }
+    }, 6500);
+    return () => clearTimeout(t);
+  }, []);
+
   const productPanelOpen = activeId === "ai-chat" && !!assistant.productDetail;
 
   return (
@@ -46,10 +61,12 @@ export function AppShell() {
               messages={assistant.chatMessages}
               typing={assistant.chatTyping}
               productDetail={assistant.productDetail}
+              history={assistant.chatHistory}
               onAsk={assistant.askInChat}
               onOpenModule={goTo}
               onCloseProduct={assistant.closeProduct}
               onReset={assistant.resetChat}
+              onLoadChat={assistant.loadChat}
             />
           )}
           {activeId === "product-analysis" && (
@@ -86,15 +103,15 @@ export function AppShell() {
             type="button"
             onClick={() => setPopupOpen(true)}
             aria-label="Спросить ИИ"
-            className="group fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg shadow-primary/30 transition-transform hover:scale-105"
+            className="group fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#068DFF] to-[#0463b3] text-white shadow-lg shadow-primary/30 transition-transform hover:scale-105"
           >
             <span
               aria-hidden
-              className="absolute -inset-1 -z-10 rounded-full bg-blue-500/40 animate-ping"
+              className="absolute -inset-1 -z-10 rounded-full bg-[#068DFF]/40 animate-ping"
             />
             <span
               aria-hidden
-              className="absolute inset-0 -z-10 rounded-full bg-blue-500/30 blur-md animate-pulse-glow"
+              className="absolute inset-0 -z-10 rounded-full bg-[#068DFF]/30 blur-md animate-pulse-glow"
             />
             <Sparkles className="h-6 w-6" />
           </button>

@@ -23,7 +23,7 @@ export function SectionCard({
         type="button"
         onClick={onToggle}
         aria-expanded={open}
-        className="flex w-full items-center gap-3 px-6 py-5 text-left transition-colors hover:bg-muted/40"
+        className="flex w-full items-center gap-3 px-5 py-3 text-left transition-colors hover:bg-muted/40"
       >
         <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent text-primary">
           <Icon className="h-4 w-4" strokeWidth={1.8} />
@@ -38,7 +38,7 @@ export function SectionCard({
           )}
         />
       </button>
-      {open && <div className="px-6 pb-6">{children}</div>}
+      {open && <div className="px-5 pb-5 pt-1">{children}</div>}
     </section>
   );
 }

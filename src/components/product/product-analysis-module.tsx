@@ -6,6 +6,7 @@ import { ChevronRight, Package } from "lucide-react";
 import { ProductDetail } from "@/components/product/product-detail";
 import { ProductResults } from "@/components/product/product-results";
 import { ProductSearch } from "@/components/product/product-search";
+import { TnVedTree } from "@/components/product/tn-ved-tree";
 import {
   buildProductDetail,
   productByCode,
@@ -15,12 +16,10 @@ import {
 } from "@/config/products";
 import { cn } from "@/lib/utils";
 
-type View = "search" | "results" | "detail";
-
 export function ProductAnalysisModule({ onAskAi }: { onAskAi: () => void }) {
-  const [view, setView] = useState<View>("search");
+  const [value, setValue] = useState("");
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<ProductSummary[]>([]);
+  const [results, setResults] = useState<ProductSummary[] | null>(null);
   const [detail, setDetail] = useState<ProductDetailType | null>(null);
   const [recent, setRecent] = useState<string[]>([
     "чай",
@@ -30,22 +29,36 @@ export function ProductAnalysisModule({ onAskAi }: { onAskAi: () => void }) {
   ]);
 
   function runSearch(q: string) {
-    setQuery(q);
-    setResults(searchProducts(q));
-    setView("results");
+    const term = q.trim();
+    if (!term) return;
+    setValue(term);
+    setQuery(term);
+    setResults(searchProducts(term));
     setRecent((prev) =>
-      [q, ...prev.filter((x) => x.toLowerCase() !== q.toLowerCase())].slice(0, 8)
+      [term, ...prev.filter((x) => x.toLowerCase() !== term.toLowerCase())].slice(
+        0,
+        8
+      )
     );
   }
 
   function openProduct(p: ProductSummary) {
     setDetail(buildProductDetail(p));
-    setView("detail");
   }
 
-  function openByCode(hsCode: string) {
-    const p = productByCode(hsCode);
-    if (p) openProduct(p);
+  /** Открыть товар по коду из дерева (синтезируем карточку, если кода нет в каталоге). */
+  function openByCode(hsCode: string, title?: string) {
+    const p =
+      productByCode(hsCode) ??
+      ({
+        hsCode,
+        name: title ?? hsCode,
+        brief: "Подбор по дереву ТН ВЭД",
+        dutyRate: "5%",
+        vatRate: "12%",
+        unit: "кг",
+      } satisfies ProductSummary);
+    openProduct(p);
   }
 
   return (
@@ -54,36 +67,17 @@ export function ProductAnalysisModule({ onAskAi }: { onAskAi: () => void }) {
         <Package className="h-4 w-4 shrink-0 text-muted-foreground" />
         <button
           type="button"
-          onClick={() => setView("search")}
+          onClick={() => setDetail(null)}
           className={cn(
             "shrink-0 transition-colors",
-            view === "search"
-              ? "font-bold text-foreground"
-              : "font-semibold text-muted-foreground hover:text-foreground"
+            detail
+              ? "font-semibold text-muted-foreground hover:text-foreground"
+              : "font-bold text-foreground"
           )}
         >
           Анализ товара
         </button>
-
-        {view !== "search" && (
-          <>
-            <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
-            <button
-              type="button"
-              onClick={() => setView("results")}
-              className={cn(
-                "shrink-0 transition-colors",
-                view === "results"
-                  ? "font-bold text-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              Результаты
-            </button>
-          </>
-        )}
-
-        {view === "detail" && detail && (
+        {detail && (
           <>
             <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
             <span className="truncate font-bold text-foreground">
@@ -94,25 +88,36 @@ export function ProductAnalysisModule({ onAskAi }: { onAskAi: () => void }) {
       </header>
 
       <div className="flex-1 overflow-hidden">
-        {view === "search" && (
-          <ProductSearch
-            recent={recent}
-            onSearch={runSearch}
-            onOpenProduct={openByCode}
-          />
-        )}
-        {view === "results" && (
+        {detail ? (
           <div className="h-full overflow-y-auto">
-            <ProductResults
-              query={query}
-              results={results}
-              onOpen={openProduct}
+            <ProductDetail
+              detail={detail}
+              onAskAi={onAskAi}
+              onOpenCode={openByCode}
             />
           </div>
-        )}
-        {view === "detail" && detail && (
-          <div className="h-full overflow-y-auto">
-            <ProductDetail detail={detail} onAskAi={onAskAi} />
+        ) : (
+          <div className="flex h-full flex-col">
+            <ProductSearch
+              value={value}
+              onChange={setValue}
+              onSubmit={() => runSearch(value)}
+              recent={recent}
+              onRecent={runSearch}
+            />
+            <div className="flex-1 overflow-y-auto">
+              {results ? (
+                <ProductResults
+                  query={query}
+                  results={results}
+                  onOpen={openProduct}
+                />
+              ) : (
+                <div className="px-8 pb-8 pt-4">
+                  <TnVedTree onOpenProduct={openByCode} />
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>

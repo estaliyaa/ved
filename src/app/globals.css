@@ -15,24 +15,24 @@
     --popover-foreground: 222 33% 12%;
 
     /* Brand blue */
-    --primary: 221 83% 53%; /* #2563EB */
+    --primary: 208 100% 51%; /* #068DFF */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 228 33% 96%;
-    --secondary-foreground: 222 28% 24%;
+    --secondary: 210 33% 96%;
+    --secondary-foreground: 215 28% 24%;
 
-    --muted: 228 28% 96%;
-    --muted-foreground: 222 12% 46%;
+    --muted: 210 28% 96%;
+    --muted-foreground: 215 14% 46%;
 
-    --accent: 222 100% 96%; /* light blue — active nav / hover */
-    --accent-foreground: 221 83% 53%;
+    --accent: 205 100% 95%; /* light blue — active nav / hover */
+    --accent-foreground: 208 100% 42%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 228 24% 91%;
-    --input: 228 24% 91%;
-    --ring: 221 83% 53%;
+    --border: 214 24% 91%;
+    --input: 214 24% 91%;
+    --ring: 208 100% 51%;
 
     --sidebar: 0 0% 100%;
     --sidebar-foreground: 222 16% 44%;
