@@ -6,9 +6,12 @@ import { Sparkles } from "lucide-react";
 import { ModuleSidebar } from "@/components/app/module-sidebar";
 import { UnderDevelopment } from "@/components/app/under-development";
 import { CalculatorModule } from "@/components/calculator/calculator-module";
+import { CustomsModule } from "@/components/customs/customs-module";
 import { AiAssistantPopup } from "@/components/chat/ai-assistant-popup";
 import { AiChatModule } from "@/components/chat/ai-chat-module";
 import { useAssistant } from "@/components/chat/use-assistant";
+import { ImporterCheckModule } from "@/components/importer/importer-check-module";
+import { ImporterMapModule } from "@/components/importer/importer-map-module";
 import { ProductAnalysisModule } from "@/components/product/product-analysis-module";
 import { moduleById } from "@/config/modules";
 
@@ -72,7 +75,14 @@ export function AppShell() {
           {activeId === "product-analysis" && (
             <ProductAnalysisModule onAskAi={() => setPopupOpen(true)} />
           )}
+          {activeId === "importer-map" && (
+            <ImporterMapModule onAskAi={() => setPopupOpen(true)} />
+          )}
+          {activeId === "importer-check" && (
+            <ImporterCheckModule onAskAi={() => setPopupOpen(true)} />
+          )}
           {activeId === "calculator" && <CalculatorModule />}
+          {activeId === "customs-infrastructure" && <CustomsModule />}
           {active?.kind === "dev" && (
             <UnderDevelopment
               icon={active.icon}

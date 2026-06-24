@@ -18,41 +18,80 @@ export const countries = [
   "США",
 ];
 
-export const itemTypes = ["Товар", "Сырьё", "Оборудование", "Комплектующие"];
-
 export const currencies = ["KZT", "USD", "EUR", "CNY", "RUB"];
+
+export const VAT_RATE = 0.12;
+export const CUSTOMS_FEE = 25_000; // сбор за оформление, ₸
 
 export type CalcItem = {
   id: number;
   name: string;
   code: string;
-  country: string;
-  price: string;
-  type: string;
-  currency: string;
+  price: string; // таможенная стоимость единицы
+  qty: string;
+  dutyRate: string; // %
+  exciseRate: string; // %
+};
+
+export type CalcLine = {
+  id: number;
+  name: string;
+  customsValue: number;
+  duty: number;
+  excise: number;
+  vat: number;
+  total: number;
 };
 
 export type CalcResult = {
+  lines: CalcLine[];
   customsValue: number;
   duty: number;
-  fee: number;
+  excise: number;
   vat: number;
-  totalPayments: number;
-  totalDue: number;
+  fee: number;
+  payments: number; // пошлина + акциз + НДС + сбор
+  total: number; // стоимость + платежи
 };
 
-/** Демо-расчёт платежей по списку товаров (упрощённая модель). */
+export function emptyItem(id: number): CalcItem {
+  return { id, name: "", code: "", price: "", qty: "1", dutyRate: "5", exciseRate: "0" };
+}
+
+/** Демо-расчёт таможенных платежей (упрощённая модель, без конвертации валют). */
 export function calculate(items: CalcItem[]): CalcResult {
-  const customsValue = items.reduce(
-    (sum, i) => sum + (Number(i.price) || 0),
-    0
-  );
-  const duty = customsValue * 0.05; // пошлина 5%
-  const fee = items.length ? 20000 : 0; // таможенный сбор
-  const vat = (customsValue + duty) * 0.12; // НДС 12%
-  const totalPayments = duty + fee + vat;
-  const totalDue = customsValue + totalPayments;
-  return { customsValue, duty, fee, vat, totalPayments, totalDue };
+  const lines: CalcLine[] = items.map((i) => {
+    const customsValue = (Number(i.price) || 0) * (Number(i.qty) || 0);
+    const duty = customsValue * ((Number(i.dutyRate) || 0) / 100);
+    const excise = customsValue * ((Number(i.exciseRate) || 0) / 100);
+    const vat = (customsValue + duty + excise) * VAT_RATE;
+    return {
+      id: i.id,
+      name: i.name || "Без названия",
+      customsValue,
+      duty,
+      excise,
+      vat,
+      total: customsValue + duty + excise + vat,
+    };
+  });
+
+  const customsValue = lines.reduce((s, l) => s + l.customsValue, 0);
+  const duty = lines.reduce((s, l) => s + l.duty, 0);
+  const excise = lines.reduce((s, l) => s + l.excise, 0);
+  const vat = lines.reduce((s, l) => s + l.vat, 0);
+  const fee = lines.length ? CUSTOMS_FEE : 0;
+  const payments = duty + excise + vat + fee;
+  return {
+    lines,
+    customsValue,
+    duty,
+    excise,
+    vat,
+    fee,
+    payments,
+    total: customsValue + payments,
+  };
 }
 
 export function formatKzt(n: number): string {

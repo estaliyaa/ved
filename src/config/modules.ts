@@ -12,7 +12,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-export type ModuleKind = "chat" | "product" | "calculator" | "dev";
+export type ModuleKind = "chat" | "product" | "calculator" | "tool" | "dev";
 
 export type ModuleDef = {
   id: string;
@@ -30,10 +30,10 @@ export type ModuleDef = {
 export const modules: ModuleDef[] = [
   { id: "ai-chat", label: "ИИ Чат", icon: Sparkles, kind: "chat" },
   { id: "product-analysis", label: "Анализ товара", icon: Package, kind: "product" },
-  { id: "importer-map", label: "Карта импортёра", icon: Map, kind: "dev" },
-  { id: "importer-check", label: "Проверка импортёра", icon: ShieldCheck, kind: "dev" },
+  { id: "importer-map", label: "Карта импортёра", icon: Map, kind: "tool" },
+  { id: "importer-check", label: "Проверка импортёра", icon: ShieldCheck, kind: "tool" },
   { id: "calculator", label: "Калькулятор", icon: Calculator, kind: "calculator" },
-  { id: "customs-infrastructure", label: "Околотаможенная сфера", icon: Warehouse, kind: "dev" },
+  { id: "customs-infrastructure", label: "Околотаможенная сфера", icon: Warehouse, kind: "tool" },
   { id: "container-tracking", label: "Отслеживание контейнера", icon: Ship, kind: "dev" },
   { id: "foreign-trade-analytics", label: "Аналитика ВЭД", icon: BarChart3, kind: "dev" },
   { id: "customs-audit", label: "Таможенный аудит", icon: ClipboardCheck, kind: "dev" },
