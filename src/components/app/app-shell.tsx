@@ -5,11 +5,15 @@ import { Sparkles } from "lucide-react";
 
 import { ModuleSidebar } from "@/components/app/module-sidebar";
 import { UnderDevelopment } from "@/components/app/under-development";
+import { AnalyticsModule } from "@/components/analytics/analytics-module";
+import { AuditModule } from "@/components/audit/audit-module";
 import { CalculatorModule } from "@/components/calculator/calculator-module";
+import { ContainerModule } from "@/components/container/container-module";
 import { CustomsModule } from "@/components/customs/customs-module";
 import { AiAssistantPopup } from "@/components/chat/ai-assistant-popup";
 import { AiChatModule } from "@/components/chat/ai-chat-module";
 import { useAssistant } from "@/components/chat/use-assistant";
+import { DeclarationModule } from "@/components/declaration/declaration-module";
 import { ImporterCheckModule } from "@/components/importer/importer-check-module";
 import { ImporterMapModule } from "@/components/importer/importer-map-module";
 import { ProductAnalysisModule } from "@/components/product/product-analysis-module";
@@ -83,6 +87,14 @@ export function AppShell() {
           )}
           {activeId === "calculator" && <CalculatorModule />}
           {activeId === "customs-infrastructure" && <CustomsModule />}
+          {activeId === "container-tracking" && <ContainerModule />}
+          {activeId === "foreign-trade-analytics" && <AnalyticsModule />}
+          {activeId === "customs-audit" && (
+            <AuditModule onAskAi={() => setPopupOpen(true)} />
+          )}
+          {activeId === "customs-declaration" && (
+            <DeclarationModule onAskAi={() => setPopupOpen(true)} />
+          )}
           {active?.kind === "dev" && (
             <UnderDevelopment
               icon={active.icon}
