@@ -88,7 +88,7 @@ export function AppShell() {
           {activeId === "product-analysis" && (
             <ProductAnalysisModule onAskAi={askAi} />
           )}
-          {activeId === "importer-map" && <ImporterMapModule onAskAi={askAi} />}
+          {activeId === "importer-map" && <ImporterMapModule />}
           {activeId === "importer-check" && (
             <ImporterCheckModule onAskAi={askAi} />
           )}

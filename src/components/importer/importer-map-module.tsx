@@ -1,14 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  ArrowLeft,
-  ArrowRight,
-  Check,
-  CircleCheck,
-  Map,
-  Sparkles,
-} from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, CircleCheck, Map } from "lucide-react";
 
 import { StatCard, SubTitle } from "@/components/product/data-bits";
 import { Button } from "@/components/ui/button";
@@ -54,20 +47,12 @@ const DEFAULT: Data = {
   post: "Алматы (ЦТО)",
 };
 
-export function ImporterMapModule({
-  onAskAi,
-}: {
-  onAskAi: (question?: string) => void;
-}) {
+export function ImporterMapModule() {
   const [step, setStep] = useState(0);
   const [data, setData] = useState<Data>(DEFAULT);
   const set = (p: Partial<Data>) => setData((d) => ({ ...d, ...p }));
 
   const isLast = step === STEPS.length - 1;
-  const askAi = () =>
-    onAskAi(
-      `Проанализируй импортную сделку: товар «${data.name}» (код ТН ВЭД ${data.code}), производитель ${data.manufacturer}, страна происхождения ${data.origin}, условия поставки ${data.incoterms}, маршрут ${data.route}, таможенный пост ${data.post}. Оцени платежи и риски.`
-    );
 
   return (
     <div className="flex h-full flex-col">
@@ -77,15 +62,6 @@ export function ImporterMapModule({
         <span className="ml-2 text-muted-foreground">
           · Шаг {step + 1} из {STEPS.length}
         </span>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={askAi}
-          className="ml-auto rounded-full"
-        >
-          <Sparkles className="text-primary" />
-          Спросить ИИ
-        </Button>
       </header>
 
       {/* Stepper — сегментированный прогресс */}
