@@ -36,6 +36,15 @@ export function AppShell() {
     setPopupOpen(false);
   };
 
+  // «Спросить ИИ»: с готовым вопросом — уводим в ИИ Чат, иначе открываем попап.
+  const askAi = (question?: string) => {
+    if (question && question.trim()) {
+      assistant.escalate(question);
+    } else {
+      setPopupOpen(true);
+    }
+  };
+
   // После входа ассистент сам предлагает помощь (через 6–8 сек).
   const greeted = useRef(false);
   useEffect(() => {
@@ -77,23 +86,19 @@ export function AppShell() {
             />
           )}
           {activeId === "product-analysis" && (
-            <ProductAnalysisModule onAskAi={() => setPopupOpen(true)} />
+            <ProductAnalysisModule onAskAi={askAi} />
           )}
-          {activeId === "importer-map" && (
-            <ImporterMapModule onAskAi={() => setPopupOpen(true)} />
-          )}
+          {activeId === "importer-map" && <ImporterMapModule onAskAi={askAi} />}
           {activeId === "importer-check" && (
-            <ImporterCheckModule onAskAi={() => setPopupOpen(true)} />
+            <ImporterCheckModule onAskAi={askAi} />
           )}
           {activeId === "calculator" && <CalculatorModule />}
           {activeId === "customs-infrastructure" && <CustomsModule />}
           {activeId === "container-tracking" && <ContainerModule />}
           {activeId === "foreign-trade-analytics" && <AnalyticsModule />}
-          {activeId === "customs-audit" && (
-            <AuditModule onAskAi={() => setPopupOpen(true)} />
-          )}
+          {activeId === "customs-audit" && <AuditModule onAskAi={askAi} />}
           {activeId === "customs-declaration" && (
-            <DeclarationModule onAskAi={() => setPopupOpen(true)} />
+            <DeclarationModule onAskAi={askAi} />
           )}
           {active?.kind === "dev" && (
             <UnderDevelopment

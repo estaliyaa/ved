@@ -54,7 +54,11 @@ const SECTION_ICON: Record<string, LucideIcon> = {
   violations: ShieldAlert,
 };
 
-export function AuditModule({ onAskAi }: { onAskAi?: () => void }) {
+export function AuditModule({
+  onAskAi,
+}: {
+  onAskAi?: (question?: string) => void;
+}) {
   const [value, setValue] = useState("");
   const [audit, setAudit] = useState<Audit | null>(null);
   const [open, setOpen] = useState<Set<string>>(new Set(["tnved", "violations"]));
@@ -196,7 +200,11 @@ export function AuditModule({ onAskAi }: { onAskAi?: () => void }) {
                 <div className="border-t border-primary/20 px-5 py-4">
                   <button
                     type="button"
-                    onClick={onAskAi}
+                    onClick={() =>
+                      onAskAi(
+                        `Разбери результаты таможенного аудита по «${audit.subject}»: объясни риски и помоги их снизить.`
+                      )
+                    }
                     className="flex h-9 items-center rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
                   >
                     Разобрать с ИИ

@@ -25,7 +25,11 @@ const VAL: Record<ValStatus, { icon: LucideIcon; dot: string }> = {
   risk: { icon: XCircle, dot: "text-rose-600" },
 };
 
-export function DeclarationModule({ onAskAi }: { onAskAi?: () => void }) {
+export function DeclarationModule({
+  onAskAi,
+}: {
+  onAskAi?: (question?: string) => void;
+}) {
   const [fields, setFields] = useState<DeclField[]>(initialFields);
   const result = useMemo(() => validate(fields), [fields]);
 
@@ -181,7 +185,11 @@ export function DeclarationModule({ onAskAi }: { onAskAi?: () => void }) {
                 {onAskAi && (
                   <button
                     type="button"
-                    onClick={onAskAi}
+                    onClick={() =>
+                      onAskAi(
+                        "Помоги заполнить таможенную декларацию и проверь её перед подачей."
+                      )
+                    }
                     className="mt-4 flex h-9 w-full items-center justify-center rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
                   >
                     Помощь ИИ с заполнением

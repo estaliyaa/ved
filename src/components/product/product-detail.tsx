@@ -53,15 +53,21 @@ export function ProductDetail({
   detail,
   onAskAi,
   onOpenCode,
+  dense = false,
 }: {
   detail: ProductDetailType;
-  onAskAi: () => void;
+  /** Передаётся готовый вопрос для ассистента (привязан к товару/разделу). */
+  onAskAi: (question?: string) => void;
   onOpenCode?: (hsCode: string, title?: string) => void;
+  /** Компактный режим для узкой панели (ИИ Чат): метрики в 2 колонки. */
+  dense?: boolean;
 }) {
   const path = findTnVedPath(detail.hsCode);
   const [openIds, setOpenIds] = useState<Set<string>>(() => new Set(["code"]));
   const [activeTab, setActiveTab] = useState<string>("code");
   const refs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  const tag = `«${detail.name}» (${detail.hsCode})`;
 
   function toggle(id: string) {
     setOpenIds((prev) => {
@@ -80,9 +86,10 @@ export function ProductDetail({
     });
   }
 
-  const sectionProps = (id: string) => ({
+  const sectionProps = (id: string, question: string) => ({
     open: openIds.has(id),
     onToggle: () => toggle(id),
+    onAskAi: () => onAskAi(question),
   });
 
   return (
@@ -102,13 +109,25 @@ export function ProductDetail({
                 {detail.brief}
               </p>
             </div>
-            <Button onClick={onAskAi} className="shrink-0 rounded-full">
+            <Button
+              onClick={() =>
+                onAskAi(
+                  `Проанализируй товар ${tag}: код, пошлины, ограничения и поставки.`
+                )
+              }
+              className="shrink-0 rounded-full"
+            >
               <Sparkles />
               Спросить ИИ
             </Button>
           </div>
 
-          <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <div
+            className={cn(
+              "mt-6 grid gap-4",
+              dense ? "grid-cols-2" : "grid-cols-2 sm:grid-cols-4"
+            )}
+          >
             <StatCard label="Импортная пошлина" value={detail.dutyRate} />
             <StatCard label="НДС" value={detail.vatRate} />
             <StatCard label="Акциз" value={detail.excise} />
@@ -150,7 +169,10 @@ export function ProductDetail({
             <SectionCard
               icon={SquareStack}
               title="Справка по коду"
-              {...sectionProps("code")}
+              {...sectionProps(
+                "code",
+                `Дай справку по коду ТН ВЭД ${detail.hsCode} для ${tag}: пошлины, НДС, ограничения, маркировка.`
+              )}
             >
               <div className="flex flex-col gap-6">
                 <LabeledBlock title="Описание товара">
@@ -192,7 +214,10 @@ export function ProductDetail({
             <SectionCard
               icon={ShieldAlert}
               title="Санкционные ограничения"
-              {...sectionProps("sanctions")}
+              {...sectionProps(
+                "sanctions",
+                `Какие санкционные ограничения и меры регулирования по ${tag}?`
+              )}
             >
               <div className="flex flex-col gap-6">
                 <LabeledBlock title="Список санкций">
@@ -219,11 +244,19 @@ export function ProductDetail({
             <SectionCard
               icon={Globe}
               title="ВЭД по товару"
-              {...sectionProps("trade")}
+              {...sectionProps(
+                "trade",
+                `Покажи ВЭД-статистику по ${tag}: импортёры, экспортёры, страны и динамику.`
+              )}
             >
               <div className="flex flex-col gap-6">
                 <LabeledBlock title="Статистика">
-                  <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                  <div
+                    className={cn(
+                      "grid gap-4",
+                      dense ? "grid-cols-2" : "grid-cols-2 sm:grid-cols-4"
+                    )}
+                  >
                     {detail.tradeStats.map((s) => (
                       <StatCard key={s.label} label={s.label} value={s.value} />
                     ))}
@@ -268,7 +301,10 @@ export function ProductDetail({
             <SectionCard
               icon={Scale}
               title="Международный рынок и тарифы"
-              {...sectionProps("market")}
+              {...sectionProps(
+                "market",
+                `Какие международные тарифы, пошлины и преференции на ${tag}?`
+              )}
             >
               <div className="flex flex-col gap-6">
                 <LabeledBlock title="Международные тарифы">
@@ -315,7 +351,10 @@ export function ProductDetail({
             <SectionCard
               icon={ListTree}
               title="Дерево ТН ВЭД"
-              {...sectionProps("tree")}
+              {...sectionProps(
+                "tree",
+                `Покажи положение кода ${detail.hsCode} в дереве ТН ВЭД и соседние позиции.`
+              )}
             >
               {path.length > 0 ? (
                 <ol className="flex flex-col">
@@ -378,26 +417,6 @@ export function ProductDetail({
           </div>
         </div>
 
-        {/* Триггер ИИ-ассистента */}
-        <div className="mt-6 flex flex-col items-start gap-4 rounded-2xl border border-primary/30 bg-accent/40 p-5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-3">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#068DFF] to-[#0463b3] text-white">
-              <Sparkles className="h-5 w-5" />
-            </span>
-            <div>
-              <p className="text-sm font-semibold text-foreground">
-                Не разобрались? Помогу проанализировать
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Спросите ассистента про код, пошлины, ограничения или поставки
-              </p>
-            </div>
-          </div>
-          <Button onClick={onAskAi} className="shrink-0 rounded-full">
-            <Sparkles />
-            Спросить ИИ
-          </Button>
-        </div>
       </div>
     </div>
   );

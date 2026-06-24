@@ -59,7 +59,11 @@ function RiskBadge({ risk }: { risk: ImporterSummary["risk"] }) {
   );
 }
 
-export function ImporterCheckModule({ onAskAi }: { onAskAi: () => void }) {
+export function ImporterCheckModule({
+  onAskAi,
+}: {
+  onAskAi: (question?: string) => void;
+}) {
   const [value, setValue] = useState("");
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<ImporterSummary[] | null>(null);
@@ -229,10 +233,10 @@ function Profile({
   onAskAi,
 }: {
   profile: ImporterProfile;
-  onAskAi: () => void;
+  onAskAi: (question?: string) => void;
 }) {
   const [open, setOpen] = useState<Set<string>>(() => new Set(["overview"]));
-  const props = (id: string) => ({
+  const props = (id: string, topic: string) => ({
     open: open.has(id),
     onToggle: () =>
       setOpen((p) => {
@@ -240,7 +244,15 @@ function Profile({
         n.has(id) ? n.delete(id) : n.add(id);
         return n;
       }),
+    onAskAi: () =>
+      onAskAi(
+        `${topic} по импортёру ${profile.name} (БИН ${profile.bin}).`
+      ),
   });
+  const askProfile = () =>
+    onAskAi(
+      `Проверь импортёра ${profile.name} (БИН ${profile.bin}). Оцени надёжность, ВЭД-активность и риски.`
+    );
 
   return (
     <div className="px-8 py-6">
@@ -263,7 +275,7 @@ function Profile({
             </div>
             <div className="flex shrink-0 items-center gap-3">
               <RiskBadge risk={profile.risk} />
-              <Button onClick={onAskAi} className="rounded-full">
+              <Button onClick={askProfile} className="rounded-full">
                 <Sparkles />
                 Спросить ИИ
               </Button>
@@ -277,7 +289,7 @@ function Profile({
           </div>
         </div>
 
-        <SectionCard icon={Building2} title="Обзор" {...props("overview")}>
+        <SectionCard icon={Building2} title="Обзор" {...props("overview", "Расскажи про реквизиты и обзор")}>
           <div className="flex flex-col gap-6">
             <KeyValueList
               rows={[
@@ -299,7 +311,7 @@ function Profile({
           </div>
         </SectionCard>
 
-        <SectionCard icon={Globe} title="Внешнеэкономическая деятельность" {...props("fea")}>
+        <SectionCard icon={Globe} title="Внешнеэкономическая деятельность" {...props("fea", "Проанализируй внешнеэкономическую деятельность")}>
           <div className="flex flex-col gap-6">
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
               <StatCard label="Импорт" value={profile.importVol} />
@@ -314,7 +326,7 @@ function Profile({
           </div>
         </SectionCard>
 
-        <SectionCard icon={BarChart3} title="Товары" {...props("products")}>
+        <SectionCard icon={BarChart3} title="Товары" {...props("products", "Разбери товарную номенклатуру и коды ТН ВЭД")}>
           <div className="flex flex-col gap-6">
             <div>
               <SubTitle>Основные коды ТН ВЭД</SubTitle>
@@ -341,7 +353,7 @@ function Profile({
           </div>
         </SectionCard>
 
-        <SectionCard icon={Users} title="Контрагенты" {...props("partners")}>
+        <SectionCard icon={Users} title="Контрагенты" {...props("partners", "Оцени контрагентов")}>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
             <div>
               <SubTitle>Поставщики</SubTitle>
@@ -354,7 +366,7 @@ function Profile({
           </div>
         </SectionCard>
 
-        <SectionCard icon={BarChart3} title="Аналитика" {...props("analytics")}>
+        <SectionCard icon={BarChart3} title="Аналитика" {...props("analytics", "Проанализируй динамику и объёмы")}>
           <div className="flex flex-col gap-6">
             <div>
               <SubTitle>Динамика активности</SubTitle>
@@ -377,7 +389,7 @@ function Profile({
           </div>
         </SectionCard>
 
-        <SectionCard icon={ShieldAlert} title="Риски" {...props("risks")}>
+        <SectionCard icon={ShieldAlert} title="Риски" {...props("risks", "Объясни риски и аномалии")}>
           <div className="flex flex-col gap-6">
             <div>
               <SubTitle>Аномалии</SubTitle>

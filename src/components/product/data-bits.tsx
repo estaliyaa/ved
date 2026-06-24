@@ -1,4 +1,4 @@
-import { ChevronDown, type LucideIcon } from "lucide-react";
+import { ChevronDown, Sparkles, type LucideIcon } from "lucide-react";
 
 import type { Bar } from "@/config/products";
 import { cn } from "@/lib/utils";
@@ -10,12 +10,15 @@ export function SectionCard({
   open,
   onToggle,
   children,
+  onAskAi,
 }: {
   icon: LucideIcon;
   title: string;
   open: boolean;
   onToggle: () => void;
   children: React.ReactNode;
+  /** Если задан — внизу секции появляется кнопка «Спросить ИИ» по этому блоку. */
+  onAskAi?: () => void;
 }) {
   return (
     <section className="overflow-hidden rounded-2xl border border-border bg-card">
@@ -38,7 +41,23 @@ export function SectionCard({
           )}
         />
       </button>
-      {open && <div className="px-5 pb-5 pt-1">{children}</div>}
+      {open && (
+        <div className="px-5 pb-5 pt-1">
+          {children}
+          {onAskAi && (
+            <div className="mt-5 flex justify-end border-t border-border pt-4">
+              <button
+                type="button"
+                onClick={onAskAi}
+                className="flex h-8 items-center gap-2 rounded-full border border-primary/30 bg-accent/40 px-4 text-xs font-semibold text-primary transition-colors hover:bg-accent"
+              >
+                <Sparkles className="h-4 w-4" />
+                Спросить ИИ по разделу
+              </button>
+            </div>
+          )}
+        </div>
+      )}
     </section>
   );
 }

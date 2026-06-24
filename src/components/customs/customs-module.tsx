@@ -85,8 +85,8 @@ export function CustomsModule() {
 
       {/* Список + карта */}
       <div className="flex min-h-0 flex-1">
-        <div className="w-[380px] shrink-0 overflow-y-auto border-r border-border p-4">
-          <p className="mb-3 px-1 text-xs text-muted-foreground">
+        <div className="w-[380px] shrink-0 overflow-y-auto border-r border-border px-8 py-4">
+          <p className="mb-3 text-xs text-muted-foreground">
             Найдено объектов: {filtered.length}
           </p>
           <ul className="flex flex-col gap-2">
@@ -124,7 +124,7 @@ export function CustomsModule() {
               );
             })}
             {filtered.length === 0 && (
-              <li className="px-1 py-4 text-sm text-muted-foreground">
+              <li className="py-4 text-sm text-muted-foreground">
                 Ничего не найдено
               </li>
             )}

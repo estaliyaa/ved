@@ -214,7 +214,11 @@ export function AiChatModule({
         </div>
 
         {productDetail ? (
-          <ChatProductPanel detail={productDetail} onClose={onCloseProduct} />
+          <ChatProductPanel
+            detail={productDetail}
+            onClose={onCloseProduct}
+            onAsk={onAsk}
+          />
         ) : historyOpen ? (
           <ChatHistoryPanel
             items={history}

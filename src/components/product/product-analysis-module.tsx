@@ -16,7 +16,11 @@ import {
 } from "@/config/products";
 import { cn } from "@/lib/utils";
 
-export function ProductAnalysisModule({ onAskAi }: { onAskAi: () => void }) {
+export function ProductAnalysisModule({
+  onAskAi,
+}: {
+  onAskAi: (question?: string) => void;
+}) {
   const [value, setValue] = useState("");
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<ProductSummary[] | null>(null);

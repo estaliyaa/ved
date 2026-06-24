@@ -54,12 +54,20 @@ const DEFAULT: Data = {
   post: "Алматы (ЦТО)",
 };
 
-export function ImporterMapModule({ onAskAi }: { onAskAi: () => void }) {
+export function ImporterMapModule({
+  onAskAi,
+}: {
+  onAskAi: (question?: string) => void;
+}) {
   const [step, setStep] = useState(0);
   const [data, setData] = useState<Data>(DEFAULT);
   const set = (p: Partial<Data>) => setData((d) => ({ ...d, ...p }));
 
   const isLast = step === STEPS.length - 1;
+  const askAi = () =>
+    onAskAi(
+      `Проанализируй импортную сделку: товар «${data.name}» (код ТН ВЭД ${data.code}), производитель ${data.manufacturer}, страна происхождения ${data.origin}, условия поставки ${data.incoterms}, маршрут ${data.route}, таможенный пост ${data.post}. Оцени платежи и риски.`
+    );
 
   return (
     <div className="flex h-full flex-col">
@@ -72,7 +80,7 @@ export function ImporterMapModule({ onAskAi }: { onAskAi: () => void }) {
         <Button
           variant="outline"
           size="sm"
-          onClick={onAskAi}
+          onClick={askAi}
           className="ml-auto rounded-full"
         >
           <Sparkles className="text-primary" />
@@ -80,49 +88,47 @@ export function ImporterMapModule({ onAskAi }: { onAskAi: () => void }) {
         </Button>
       </header>
 
-      {/* Stepper */}
-      <div className="shrink-0 border-b border-border px-8 py-4">
-        <ol className="flex items-center gap-2 overflow-x-auto">
+      {/* Stepper — сегментированный прогресс */}
+      <div className="shrink-0 border-b border-border px-8 py-5">
+        <div className="flex items-end gap-2">
           {STEPS.map((s, i) => {
             const done = i < step;
             const active = i === step;
             return (
-              <li key={s} className="flex shrink-0 items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setStep(i)}
-                  className="flex items-center gap-2"
-                >
-                  <span
-                    className={cn(
-                      "flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-colors",
-                      active
-                        ? "bg-primary text-primary-foreground"
-                        : done
-                          ? "bg-accent text-primary"
-                          : "bg-muted text-muted-foreground"
-                    )}
-                  >
-                    {done ? <Check className="h-4 w-4" /> : i + 1}
-                  </span>
-                  <span
-                    className={cn(
-                      "whitespace-nowrap text-sm",
-                      active
-                        ? "font-semibold text-foreground"
+              <button
+                key={s}
+                type="button"
+                onClick={() => setStep(i)}
+                className="group flex flex-1 flex-col gap-2 text-left"
+                aria-current={active ? "step" : undefined}
+              >
+                <span
+                  className={cn(
+                    "h-1 rounded-full transition-colors",
+                    done || active ? "bg-primary" : "bg-muted"
+                  )}
+                />
+                <span
+                  className={cn(
+                    "flex items-center gap-1 text-xs transition-colors",
+                    active
+                      ? "font-semibold text-primary"
+                      : done
+                        ? "text-foreground"
                         : "text-muted-foreground"
-                    )}
-                  >
-                    {s}
-                  </span>
-                </button>
-                {i < STEPS.length - 1 && (
-                  <span className="h-px w-6 shrink-0 bg-border" />
-                )}
-              </li>
+                  )}
+                >
+                  {done ? (
+                    <Check className="h-4 w-4 shrink-0 text-primary" />
+                  ) : (
+                    <span className="shrink-0 tabular-nums">{i + 1}.</span>
+                  )}
+                  <span className="truncate">{s}</span>
+                </span>
+              </button>
             );
           })}
-        </ol>
+        </div>
       </div>
 
       {/* Step content */}
