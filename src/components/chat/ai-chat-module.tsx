@@ -150,7 +150,7 @@ export function AiChatModule({
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
           <div ref={scrollRef} className="flex-1 overflow-y-auto px-8 py-8">
             {empty ? (
-              <div className="mx-auto w-full max-w-3xl pb-4 pt-6 animate-fade-in-up">
+              <div className="mx-auto w-full max-w-3xl pb-4 pt-12 animate-fade-in-up">
                 {/* Hero */}
                 <div className="flex flex-col items-center text-center">
                   <h2 className="text-4xl font-bold leading-tight tracking-tight text-foreground sm:text-5xl">
