@@ -2,7 +2,6 @@
 
 import { useRef, useState } from "react";
 import {
-  ChevronDown,
   ExternalLink,
   FileText,
   Globe,
@@ -114,59 +113,43 @@ function CustomsTableView({ table }: { table: CustomsTable }) {
   );
 }
 
-function SubAccordion({ section }: { section: CustomsSection }) {
-  const [open, setOpen] = useState(true);
+function CustomsSubsection({ section }: { section: CustomsSection }) {
   const [noteOpen, setNoteOpen] = useState(false);
   return (
-    <section className="overflow-hidden rounded-xl border border-border">
-      <button
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        aria-expanded={open}
-        className="flex w-full items-center justify-between gap-3 bg-muted/40 px-4 py-3 text-left transition-colors hover:bg-muted/60"
-      >
-        <h4 className="text-sm font-semibold text-foreground">{section.title}</h4>
-        <ChevronDown
-          className={cn(
-            "h-4 w-4 shrink-0 text-muted-foreground transition-transform",
-            open && "rotate-180"
-          )}
-        />
-      </button>
-      {open && (
-        <div className="flex flex-col gap-4 p-4">
-          {section.tables.length > 0 ? (
-            section.tables.map((t, i) => <CustomsTableView key={i} table={t} />)
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              Нет данных по выбранному режиму.
-            </p>
-          )}
+    <div className="flex flex-col gap-3">
+      <h4 className="text-base font-semibold tracking-tight text-foreground">
+        {section.title}
+      </h4>
+      {section.tables.length > 0 ? (
+        section.tables.map((t, i) => <CustomsTableView key={i} table={t} />)
+      ) : (
+        <p className="text-sm text-muted-foreground">
+          Нет данных по выбранному режиму.
+        </p>
+      )}
 
-          {section.note && section.note.length > 0 && (
-            <div className="overflow-hidden rounded-lg bg-accent/40">
-              <button
-                type="button"
-                onClick={() => setNoteOpen((o) => !o)}
-                className="flex w-full items-center justify-between px-4 py-2 text-sm"
-              >
-                <span className="text-muted-foreground">Примечание</span>
-                <span className="font-medium text-primary">
-                  {noteOpen ? "Скрыть" : "Показать"}
-                </span>
-              </button>
-              {noteOpen && (
-                <ul className="flex flex-col gap-1 px-4 pb-3 text-sm text-foreground">
-                  {section.note.map((n, i) => (
-                    <li key={i}>{n}</li>
-                  ))}
-                </ul>
-              )}
-            </div>
+      {section.note && section.note.length > 0 && (
+        <div className="overflow-hidden rounded-lg bg-accent/40">
+          <button
+            type="button"
+            onClick={() => setNoteOpen((o) => !o)}
+            className="flex w-full items-center justify-between px-4 py-2 text-sm"
+          >
+            <span className="text-muted-foreground">Примечание</span>
+            <span className="font-medium text-primary">
+              {noteOpen ? "Скрыть" : "Показать"}
+            </span>
+          </button>
+          {noteOpen && (
+            <ul className="flex flex-col gap-1 px-4 pb-3 text-sm text-foreground">
+              {section.note.map((n, i) => (
+                <li key={i}>{n}</li>
+              ))}
+            </ul>
           )}
         </div>
       )}
-    </section>
+    </div>
   );
 }
 
@@ -357,9 +340,11 @@ export function ProductDetail({
                 </div>
 
                 {/* Подразделы справки */}
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col divide-y divide-border">
                   {customs.map((s) => (
-                    <SubAccordion key={s.id} section={s} />
+                    <div key={s.id} className="py-6 first:pt-0 last:pb-0">
+                      <CustomsSubsection section={s} />
+                    </div>
                   ))}
                 </div>
               </div>
