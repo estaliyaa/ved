@@ -84,15 +84,7 @@ export function AppShell() {
             {activeId === "customs-infrastructure" && <CustomsModule />}
             {activeId === "container-tracking" && <ContainerModule />}
             {active?.kind === "dev" && (
-              <UnderDevelopment
-                icon={active.icon}
-                label={active.label}
-                onAskAi={() =>
-                  assistant.escalate(
-                    `Расскажи про раздел «${active.label}» и помоги решить задачу.`
-                  )
-                }
-              />
+              <UnderDevelopment icon={active.icon} label={active.label} />
             )}
           </div>
         </main>

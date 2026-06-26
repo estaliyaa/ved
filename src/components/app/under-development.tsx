@@ -1,15 +1,11 @@
-import { Cog, Sparkles, Wrench, type LucideIcon } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
+import { Cog, Wrench, type LucideIcon } from "lucide-react";
 
 export function UnderDevelopment({
   icon: Icon,
   label,
-  onAskAi,
 }: {
   icon: LucideIcon;
   label: string;
-  onAskAi: () => void;
 }) {
   return (
     <div className="flex h-full flex-col items-center justify-center px-8 text-center">
@@ -37,11 +33,6 @@ export function UnderDevelopment({
         Раздел «{label}» пока недоступен. Мы уже работаем над ним — а пока задачу
         можно решить через ассистента.
       </p>
-
-      <Button onClick={onAskAi} className="mt-6 rounded-full">
-        <Sparkles />
-        Спросить ИИ
-      </Button>
     </div>
   );
 }
