@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Download, SendHorizontal, Sparkles } from "lucide-react";
+import { Download, SendHorizontal, Sparkles } from "lucide-react";
 
 import type { AgentContext } from "@/config/agents";
 import { cn } from "@/lib/utils";
@@ -23,13 +23,11 @@ export function AgentPanel({
   context,
   pending,
   onConsumePending,
-  onClose,
 }: {
   context: AgentContext;
   /** Готовый вопрос из раздела — панель отправит его автоматически. */
   pending?: string | null;
   onConsumePending?: () => void;
-  onClose: () => void;
 }) {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [value, setValue] = useState("");
@@ -74,7 +72,7 @@ export function AgentPanel({
   const started = messages.length > 0;
 
   return (
-    <aside className="flex w-[420px] shrink-0 flex-col overflow-hidden border-l border-border bg-card">
+    <aside className="flex w-[420px] shrink-0 flex-col overflow-hidden border-r border-border bg-card">
       {/* Статус соединения */}
       <div className="flex h-12 shrink-0 items-center border-b border-border px-6">
         <span className="flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
@@ -84,23 +82,13 @@ export function AgentPanel({
       </div>
 
       {/* Шапка диалога */}
-      <header className="flex shrink-0 items-start gap-3 border-b border-border px-6 py-4">
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Закрыть ИИ-агента"
-          className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </button>
-        <div className="min-w-0">
-          <div className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            <Sparkles className="h-4 w-4 text-primary" />
-            Диалог с ИИ-агентом
-          </div>
-          <div className="mt-1 truncate text-lg font-bold tracking-tight text-foreground">
-            {context.subject}
-          </div>
+      <header className="flex shrink-0 flex-col gap-1 border-b border-border px-6 py-4">
+        <div className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          <Sparkles className="h-4 w-4 text-primary" />
+          Диалог с ИИ-агентом
+        </div>
+        <div className="truncate text-lg font-bold tracking-tight text-foreground">
+          {context.subject}
         </div>
       </header>
 
