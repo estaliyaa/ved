@@ -35,7 +35,7 @@ export const modules: ModuleDef[] = [
   { id: "calculator", label: "Калькулятор", icon: Calculator, kind: "calculator" },
   { id: "customs-infrastructure", label: "Околотаможенная сфера", icon: Warehouse, kind: "tool" },
   { id: "container-tracking", label: "Отслеживание контейнера", icon: Ship, kind: "tool" },
-  { id: "foreign-trade-analytics", label: "Аналитика ВЭД", icon: BarChart3, kind: "tool" },
+  { id: "foreign-trade-analytics", label: "Аналитика ВЭД", icon: BarChart3, kind: "dev" },
   { id: "customs-audit", label: "Таможенный аудит", icon: ClipboardCheck, kind: "dev" },
   { id: "customs-declaration", label: "Таможенное декларирование", icon: FileText, kind: "dev" },
 ];
