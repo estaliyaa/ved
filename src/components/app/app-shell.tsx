@@ -5,6 +5,7 @@ import { useState } from "react";
 import { ModuleSidebar } from "@/components/app/module-sidebar";
 import { UnderDevelopment } from "@/components/app/under-development";
 import { AgentPanel } from "@/components/agent/agent-panel";
+import { AnalyticsModule } from "@/components/analytics/analytics-module";
 import { CalculatorModule } from "@/components/calculator/calculator-module";
 import { ContainerModule } from "@/components/container/container-module";
 import { CustomsModule } from "@/components/customs/customs-module";
@@ -83,6 +84,7 @@ export function AppShell() {
             {activeId === "calculator" && <CalculatorModule />}
             {activeId === "customs-infrastructure" && <CustomsModule />}
             {activeId === "container-tracking" && <ContainerModule />}
+            {activeId === "foreign-trade-analytics" && <AnalyticsModule />}
             {active?.kind === "dev" && (
               <UnderDevelopment icon={active.icon} label={active.label} />
             )}
