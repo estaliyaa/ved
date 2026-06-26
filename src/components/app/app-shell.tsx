@@ -67,6 +67,7 @@ export function AppShell() {
                 history={assistant.chatHistory}
                 onAsk={assistant.askInChat}
                 onOpenModule={goTo}
+                onCardFlow={assistant.startCardFlow}
                 onCloseProduct={assistant.closeProduct}
                 onReset={assistant.resetChat}
                 onLoadChat={assistant.loadChat}

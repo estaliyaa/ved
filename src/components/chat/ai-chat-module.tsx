@@ -44,6 +44,7 @@ export function AiChatModule({
   history,
   onAsk,
   onOpenModule,
+  onCardFlow,
   onCloseProduct,
   onReset,
   onLoadChat,
@@ -54,6 +55,7 @@ export function AiChatModule({
   history: ChatHistoryItem[];
   onAsk: (text: string) => void;
   onOpenModule: (moduleId: string) => void;
+  onCardFlow: (moduleId: string) => void;
   onCloseProduct: () => void;
   onReset: () => void;
   onLoadChat: (id: string) => void;
@@ -184,7 +186,7 @@ export function AiChatModule({
                       <button
                         key={m.id}
                         type="button"
-                        onClick={() => onOpenModule(m.id)}
+                        onClick={() => onCardFlow(m.id)}
                         className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-5 text-left transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
                       >
                         <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-primary">
