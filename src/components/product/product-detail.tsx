@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import {
   ChevronDown,
+  ExternalLink,
   FileText,
   Globe,
   Scale,
@@ -318,28 +319,41 @@ export function ProductDetail({
               )}
             >
               <div className="flex flex-col gap-5">
-                {/* Переключатель режима */}
-                <div className="flex w-fit max-w-full flex-wrap items-center gap-1 rounded-2xl bg-muted p-1">
-                  {(
-                    [
-                      ["import", "Выпуск для внутреннего потребления"],
-                      ["export", "Экспорт"],
-                    ] as const
-                  ).map(([id, label]) => (
+                {/* Переключатель режима + переход к международному рынку */}
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex max-w-full flex-wrap items-center gap-1 rounded-2xl bg-muted p-1">
+                    {(
+                      [
+                        ["import", "Выпуск для внутреннего потребления"],
+                        ["export", "Экспорт"],
+                      ] as const
+                    ).map(([id, label]) => (
+                      <button
+                        key={id}
+                        type="button"
+                        onClick={() => setMode(id)}
+                        className={cn(
+                          "h-8 rounded-xl px-4 text-sm font-semibold transition-colors",
+                          mode === id
+                            ? "bg-card text-foreground shadow-sm"
+                            : "text-muted-foreground hover:text-foreground"
+                        )}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {mode === "export" && (
                     <button
-                      key={id}
                       type="button"
-                      onClick={() => setMode(id)}
-                      className={cn(
-                        "h-8 rounded-xl px-4 text-sm font-semibold transition-colors",
-                        mode === id
-                          ? "bg-card text-foreground shadow-sm"
-                          : "text-muted-foreground hover:text-foreground"
-                      )}
+                      onClick={() => goTo("market")}
+                      className="flex h-9 items-center gap-2 rounded-xl bg-accent px-4 text-sm font-semibold text-primary transition-colors hover:bg-accent/70"
                     >
-                      {label}
+                      Международный рынок и тарифы
+                      <ExternalLink className="h-4 w-4" />
                     </button>
-                  ))}
+                  )}
                 </div>
 
                 {/* Подразделы справки */}
