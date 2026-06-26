@@ -1,18 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import {
-  ArrowRight,
-  ArrowUp,
-  Barcode,
-  Calculator,
-  Clock,
-  RotateCcw,
-  Search,
-  ShieldCheck,
-  Ship,
-  Sparkles,
-} from "lucide-react";
+import { ArrowRight, ArrowUp, Clock, RotateCcw, Search, Sparkles } from "lucide-react";
 
 import { ChatHistoryPanel } from "@/components/chat/chat-history-panel";
 import { ChatMessages } from "@/components/chat/chat-messages";
@@ -22,35 +11,24 @@ import type {
   ChatHistoryItem,
   Cta,
 } from "@/components/chat/use-assistant";
+import { modules } from "@/config/modules";
 import type { ProductDetail } from "@/config/products";
 import { cn } from "@/lib/utils";
 
-const CARDS = [
-  {
-    icon: Barcode,
-    title: "Подбор кода ТН ВЭД",
-    desc: "Определю код, пошлины и НДС по описанию товара",
-    prompt: "Подобрать код ТН ВЭД для кофе",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Проверка контрагентов",
-    desc: "Реквизиты, ВЭД-активность и оценка рисков",
-    prompt: "Проверь ТОО «Чайный Дом Алматы»",
-  },
-  {
-    icon: Ship,
-    title: "Отслеживание контейнеров",
-    desc: "Маршрут, порты, статусы и дата прибытия",
-    prompt: "Отследить контейнер MSCU7263514",
-  },
-  {
-    icon: Calculator,
-    title: "Платежи и документы",
-    desc: "Рассчитаю платежи и подскажу комплект документов",
-    prompt: "Какие документы нужны для импорта оборудования?",
-  },
-];
+const MODULE_DESC: Record<string, string> = {
+  "product-analysis": "Код ТН ВЭД, пошлины, ограничения и статистика по товару",
+  "importer-map": "Пошаговый разбор импортной сделки и расчёт платежей",
+  "importer-check": "Реквизиты, ВЭД-активность и оценка рисков контрагента",
+  calculator: "Расчёт таможенных платежей по нескольким товарам",
+  "customs-infrastructure": "СВХ, склады, посты и таможенные представители",
+  "container-tracking": "Маршрут, порты, статусы и дата прибытия контейнера",
+  "foreign-trade-analytics": "Импорт, экспорт и рейтинги по странам и отраслям",
+  "customs-audit": "Проверка компании или поставки на риски",
+  "customs-declaration": "Подготовка и проверка таможенной декларации",
+};
+
+/** Все подмодули (кроме самого ИИ Ассистента) — кликабельные карточки. */
+const MODULE_CARDS = modules.filter((m) => m.kind !== "chat");
 
 function recentBadge(item: ChatHistoryItem): string {
   const a = item.messages.find((m) => m.role === "assistant" && m.badge);
@@ -196,25 +174,25 @@ export function AiChatModule({
                   </button>
                 </form>
 
-                {/* Возможности */}
-                <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
-                  {CARDS.map((c) => {
-                    const Icon = c.icon;
+                {/* Разделы — все подмодули */}
+                <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3">
+                  {MODULE_CARDS.map((m) => {
+                    const Icon = m.icon;
                     return (
                       <button
-                        key={c.title}
+                        key={m.id}
                         type="button"
-                        onClick={() => onAsk(c.prompt)}
+                        onClick={() => onOpenModule(m.id)}
                         className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-5 text-left transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
                       >
                         <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-primary">
                           <Icon className="h-5 w-5" />
                         </span>
                         <span className="text-sm font-semibold text-foreground">
-                          {c.title}
+                          {m.label}
                         </span>
                         <span className="text-xs leading-4 text-muted-foreground">
-                          {c.desc}
+                          {MODULE_DESC[m.id] ?? ""}
                         </span>
                       </button>
                     );
