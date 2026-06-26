@@ -27,8 +27,10 @@ const MODULE_DESC: Record<string, string> = {
   "customs-declaration": "Подготовка и проверка таможенной декларации",
 };
 
-/** Все подмодули (кроме самого ИИ Ассистента) — кликабельные карточки. */
-const MODULE_CARDS = modules.filter((m) => m.kind !== "chat");
+/** Готовые подмодули — кликабельные карточки (без ИИ Ассистента и разделов в разработке). */
+const MODULE_CARDS = modules.filter(
+  (m) => m.kind !== "chat" && m.kind !== "dev"
+);
 
 function recentBadge(item: ChatHistoryItem): string {
   const a = item.messages.find((m) => m.role === "assistant" && m.badge);

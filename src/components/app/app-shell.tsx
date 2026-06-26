@@ -5,14 +5,11 @@ import { useState } from "react";
 import { ModuleSidebar } from "@/components/app/module-sidebar";
 import { UnderDevelopment } from "@/components/app/under-development";
 import { AgentPanel } from "@/components/agent/agent-panel";
-import { AnalyticsModule } from "@/components/analytics/analytics-module";
-import { AuditModule } from "@/components/audit/audit-module";
 import { CalculatorModule } from "@/components/calculator/calculator-module";
 import { ContainerModule } from "@/components/container/container-module";
 import { CustomsModule } from "@/components/customs/customs-module";
 import { AiChatModule } from "@/components/chat/ai-chat-module";
 import { useAssistant } from "@/components/chat/use-assistant";
-import { DeclarationModule } from "@/components/declaration/declaration-module";
 import { ImporterCheckModule } from "@/components/importer/importer-check-module";
 import { ImporterMapModule } from "@/components/importer/importer-map-module";
 import { ProductAnalysisModule } from "@/components/product/product-analysis-module";
@@ -83,16 +80,15 @@ export function AppShell() {
             {activeId === "calculator" && <CalculatorModule />}
             {activeId === "customs-infrastructure" && <CustomsModule />}
             {activeId === "container-tracking" && <ContainerModule />}
-            {activeId === "foreign-trade-analytics" && <AnalyticsModule />}
-            {activeId === "customs-audit" && <AuditModule onAskAi={askAi} />}
-            {activeId === "customs-declaration" && (
-              <DeclarationModule onAskAi={askAi} />
-            )}
             {active?.kind === "dev" && (
               <UnderDevelopment
                 icon={active.icon}
                 label={active.label}
-                onAskAi={() => undefined}
+                onAskAi={() =>
+                  askAi(
+                    `Расскажи про раздел «${active.label}» и помоги решить задачу.`
+                  )
+                }
               />
             )}
           </div>
