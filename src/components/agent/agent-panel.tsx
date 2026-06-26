@@ -1,15 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Download, SendHorizontal, Sparkles } from "lucide-react";
+import { ArrowUp, Sparkles } from "lucide-react";
 
+import { ChatMessages } from "@/components/chat/chat-messages";
+import type { AssistantMessage } from "@/components/chat/use-assistant";
 import type { AgentContext } from "@/config/agents";
-import { cn } from "@/lib/utils";
-
-type Msg = { id: string; role: "user" | "assistant"; text: string };
 
 let seq = 0;
-const uid = () => `a-${(seq += 1)}`;
+const uid = () => `ag-${(seq += 1)}`;
 
 function reply(question: string, subject: string): string {
   return (
@@ -29,7 +28,15 @@ export function AgentPanel({
   pending?: string | null;
   onConsumePending?: () => void;
 }) {
-  const [messages, setMessages] = useState<Msg[]>([]);
+  const [messages, setMessages] = useState<AssistantMessage[]>(() => [
+    {
+      id: uid(),
+      role: "assistant",
+      kind: "text",
+      content: context.greeting,
+      followups: context.suggestions,
+    },
+  ]);
   const [value, setValue] = useState("");
   const [typing, setTyping] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -38,12 +45,20 @@ export function AgentPanel({
   function send(text: string) {
     const t = text.trim();
     if (!t) return;
-    setMessages((prev) => [...prev, { id: uid(), role: "user", text: t }]);
+    setMessages((prev) => [
+      ...prev,
+      { id: uid(), role: "user", kind: "text", content: t },
+    ]);
     setTyping(true);
     timer.current = setTimeout(() => {
       setMessages((prev) => [
         ...prev,
-        { id: uid(), role: "assistant", text: reply(t, context.subject) },
+        {
+          id: uid(),
+          role: "assistant",
+          kind: "text",
+          content: reply(t, context.subject),
+        },
       ]);
       setTyping(false);
     }, 700);
@@ -65,16 +80,17 @@ export function AgentPanel({
     []
   );
 
+  // Автоскролл вниз только после начала диалога — на старте остаёмся вверху.
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
+    if (messages.length > 1 || typing) {
+      scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
+    }
   }, [messages.length, typing]);
 
-  const started = messages.length > 0;
-
   return (
-    <aside className="flex w-[420px] shrink-0 flex-col overflow-hidden border-r border-border bg-card">
-      {/* Статус соединения */}
-      <div className="flex h-12 shrink-0 items-center border-b border-border px-6">
+    <aside className="flex w-[360px] shrink-0 flex-col overflow-hidden border-r border-border bg-card">
+      {/* Статус соединения — высота совпадает с шапкой раздела */}
+      <div className="flex h-16 shrink-0 items-center border-b border-border px-6">
         <span className="flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
           <span className="h-2 w-2 rounded-full bg-emerald-500" />
           Защищённое соединение
@@ -92,76 +108,15 @@ export function AgentPanel({
         </div>
       </header>
 
-      {/* Диалог */}
+      {/* Диалог — единый дизайн с ИИ Ассистентом */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-5">
-        {/* Приветствие + подсказки */}
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
-            <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-accent text-primary">
-              <Sparkles className="h-4 w-4" />
-            </span>
-            AI
-          </div>
-          <p className="text-base leading-6 text-foreground">{context.greeting}</p>
-          <button
-            type="button"
-            className="flex h-9 w-fit items-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-medium text-foreground transition-colors hover:bg-muted"
-          >
-            <Download className="h-4 w-4" />
-            Скачать
-          </button>
-
-          {!started && (
-            <div className="mt-1 flex flex-wrap gap-2">
-              {context.suggestions.map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  onClick={() => send(s)}
-                  className="rounded-full border border-border bg-card px-4 py-2 text-sm text-foreground transition-colors hover:border-primary/40 hover:bg-accent"
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Сообщения */}
-        {started && (
-          <div className="mt-6 flex flex-col gap-4">
-            {messages.map((m) =>
-              m.role === "user" ? (
-                <div key={m.id} className="flex justify-end">
-                  <div className="max-w-[85%] rounded-2xl rounded-br-md bg-primary px-4 py-2 text-sm text-primary-foreground">
-                    {m.text}
-                  </div>
-                </div>
-              ) : (
-                <div key={m.id} className="flex flex-col gap-2">
-                  <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
-                    <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-accent text-primary">
-                      <Sparkles className="h-4 w-4" />
-                    </span>
-                    AI
-                  </div>
-                  <p className="text-sm leading-5 text-foreground">{m.text}</p>
-                </div>
-              )
-            )}
-            {typing && (
-              <div className="flex gap-1 px-1">
-                {[0, 1, 2].map((i) => (
-                  <span
-                    key={i}
-                    className="h-2 w-2 rounded-full bg-muted-foreground/50 animate-typing"
-                    style={{ animationDelay: `${i * 0.15}s` }}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+        <ChatMessages
+          messages={messages}
+          typing={typing}
+          onFollowup={send}
+          onCta={() => undefined}
+          onOpenModule={() => undefined}
+        />
       </div>
 
       {/* Ввод */}
@@ -172,7 +127,7 @@ export function AgentPanel({
             send(value);
             setValue("");
           }}
-          className="flex h-12 items-center gap-2 rounded-2xl border border-border bg-card pl-4 pr-2 transition-colors focus-within:border-primary/50"
+          className="flex items-center gap-2 rounded-full border border-border bg-card p-2 pl-5 shadow-sm shadow-foreground/5"
         >
           <input
             type="text"
@@ -186,11 +141,9 @@ export function AgentPanel({
             type="submit"
             disabled={value.trim().length === 0}
             aria-label="Отправить"
-            className={cn(
-              "flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-40"
-            )}
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-40"
           >
-            <SendHorizontal className="h-4 w-4" />
+            <ArrowUp className="h-5 w-5" />
           </button>
         </form>
         <p className="mt-2 text-xs text-muted-foreground">

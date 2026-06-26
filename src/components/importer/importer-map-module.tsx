@@ -64,47 +64,49 @@ export function ImporterMapModule() {
         </span>
       </header>
 
-      {/* Stepper — сегментированный прогресс */}
+      {/* Stepper — компактные шаги с соединителями (вмещается на любой ширине) */}
       <div className="shrink-0 border-b border-border px-8 py-5">
-        <div className="flex items-end gap-2">
+        <div className="flex items-center">
           {STEPS.map((s, i) => {
             const done = i < step;
             const active = i === step;
+            const last = i === STEPS.length - 1;
             return (
-              <button
+              <div
                 key={s}
-                type="button"
-                onClick={() => setStep(i)}
-                className="group flex flex-1 flex-col gap-2 text-left"
-                aria-current={active ? "step" : undefined}
+                className={cn("flex items-center", !last && "flex-1")}
               >
-                <span
+                <button
+                  type="button"
+                  onClick={() => setStep(i)}
+                  title={s}
+                  aria-current={active ? "step" : undefined}
                   className={cn(
-                    "h-1 rounded-full transition-colors",
-                    done || active ? "bg-primary" : "bg-muted"
-                  )}
-                />
-                <span
-                  className={cn(
-                    "flex items-center gap-1 text-xs transition-colors",
-                    active
-                      ? "font-semibold text-primary"
-                      : done
-                        ? "text-foreground"
-                        : "text-muted-foreground"
+                    "flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold transition-colors",
+                    done
+                      ? "bg-primary text-primary-foreground"
+                      : active
+                        ? "bg-primary text-primary-foreground ring-4 ring-primary/20"
+                        : "bg-muted text-muted-foreground hover:bg-border"
                   )}
                 >
-                  {done ? (
-                    <Check className="h-4 w-4 shrink-0 text-primary" />
-                  ) : (
-                    <span className="shrink-0 tabular-nums">{i + 1}.</span>
-                  )}
-                  <span className="truncate">{s}</span>
-                </span>
-              </button>
+                  {done ? <Check className="h-4 w-4" /> : i + 1}
+                </button>
+                {!last && (
+                  <span
+                    className={cn(
+                      "mx-2 h-1 flex-1 rounded-full transition-colors",
+                      done ? "bg-primary" : "bg-muted"
+                    )}
+                  />
+                )}
+              </div>
             );
           })}
         </div>
+        <p className="mt-3 text-sm font-semibold text-foreground">
+          {STEPS[step]}
+        </p>
       </div>
 
       {/* Step content */}
