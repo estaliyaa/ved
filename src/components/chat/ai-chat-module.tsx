@@ -117,7 +117,7 @@ export function AiChatModule({
       <header className="flex h-16 shrink-0 items-center gap-2 border-b border-border px-8">
         <Sparkles className="h-5 w-5 text-primary" />
         <h1 className="text-lg font-bold tracking-tight text-foreground">
-          ИИ Чат
+          ИИ Ассистент
         </h1>
         <div className="ml-auto flex items-center gap-2">
           <button
@@ -148,9 +148,9 @@ export function AiChatModule({
 
       <div className="flex flex-1 overflow-hidden">
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-          <div ref={scrollRef} className="flex-1 overflow-y-auto px-8 py-8">
+          <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-8">
             {empty ? (
-              <div className="mx-auto w-full max-w-3xl pb-4 pt-12 animate-fade-in-up">
+              <div className="mx-auto w-full max-w-5xl pb-4 pt-12 animate-fade-in-up">
                 {/* Hero */}
                 <div className="flex flex-col items-center text-center">
                   <h2 className="text-4xl font-bold leading-tight tracking-tight text-foreground sm:text-5xl">
@@ -262,7 +262,7 @@ export function AiChatModule({
                 )}
               </div>
             ) : (
-              <div className="mx-auto w-full max-w-3xl">
+              <div className="mx-auto w-full max-w-4xl">
                 <ChatMessages
                   messages={messages}
                   typing={typing}
@@ -275,13 +275,13 @@ export function AiChatModule({
           </div>
 
           {!empty && (
-            <div className="px-8 pb-8">
+            <div className="px-6 pb-8">
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
                   submit();
                 }}
-                className="mx-auto flex w-full max-w-3xl items-center gap-3 rounded-full border border-border bg-card p-2 pl-6 shadow-sm shadow-foreground/5"
+                className="mx-auto flex w-full max-w-4xl items-center gap-3 rounded-full border border-border bg-card p-2 pl-6 shadow-sm shadow-foreground/5"
               >
                 <input
                   type="text"

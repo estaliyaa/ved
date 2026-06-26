@@ -28,7 +28,7 @@ export type ModuleDef = {
  * - `dev`     — раздел в разработке (заглушка с иллюстрацией).
  */
 export const modules: ModuleDef[] = [
-  { id: "ai-chat", label: "ИИ Чат", icon: Sparkles, kind: "chat" },
+  { id: "ai-chat", label: "ИИ Ассистент", icon: Sparkles, kind: "chat" },
   { id: "product-analysis", label: "Анализ товара", icon: Package, kind: "product" },
   { id: "importer-map", label: "Карта импортёра", icon: Map, kind: "tool" },
   { id: "importer-check", label: "Проверка импортёра", icon: ShieldCheck, kind: "tool" },
