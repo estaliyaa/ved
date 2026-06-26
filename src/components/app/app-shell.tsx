@@ -34,7 +34,9 @@ export function AppShell() {
 
   const productPanelOpen = activeId === "ai-chat" && !!assistant.productDetail;
   const isChat = activeId === "ai-chat";
-  const showAgent = !isChat;
+  // Агент показываем во всех готовых разделах, кроме самого ИИ Ассистента
+  // и разделов «в разработке».
+  const showAgent = !isChat && active?.kind !== "dev";
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
@@ -85,7 +87,7 @@ export function AppShell() {
                 icon={active.icon}
                 label={active.label}
                 onAskAi={() =>
-                  askAi(
+                  assistant.escalate(
                     `Расскажи про раздел «${active.label}» и помоги решить задачу.`
                   )
                 }
