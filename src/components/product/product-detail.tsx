@@ -2,18 +2,17 @@
 
 import { useRef, useState } from "react";
 import {
+  ChevronDown,
+  FileText,
   Globe,
-  ListTree,
   Scale,
   ShieldAlert,
   Sparkles,
-  SquareStack,
 } from "lucide-react";
 
 import {
   BarList,
   BulletList,
-  KeyValueList,
   SectionCard,
   SimpleTable,
   StatCard,
@@ -22,16 +21,19 @@ import {
   YearBars,
 } from "@/components/product/data-bits";
 import { Button } from "@/components/ui/button";
-import type { ProductDetail as ProductDetailType } from "@/config/products";
-import { findTnVedPath } from "@/config/tnved";
+import type {
+  CustomsCell,
+  CustomsSection,
+  CustomsTable,
+  ProductDetail as ProductDetailType,
+} from "@/config/products";
 import { cn } from "@/lib/utils";
 
 const TABS = [
-  { id: "code", title: "Справка по коду" },
+  { id: "info", title: "Информация о товаре" },
   { id: "sanctions", title: "Санкционные ограничения" },
   { id: "trade", title: "ВЭД по товару" },
   { id: "market", title: "Международный рынок и тарифы" },
-  { id: "tree", title: "Дерево ТН ВЭД" },
 ] as const;
 
 function LabeledBlock({
@@ -49,10 +51,127 @@ function LabeledBlock({
   );
 }
 
+function HeaderField({
+  label,
+  value,
+  children,
+}: {
+  label: string;
+  value?: string;
+  children?: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-col gap-1">
+      <span className="text-xs text-muted-foreground">{label}</span>
+      {children ?? (
+        <span className="text-sm font-semibold text-foreground">{value}</span>
+      )}
+    </div>
+  );
+}
+
+function Cell({ cell }: { cell: CustomsCell }) {
+  if (typeof cell === "object" && cell && "link" in cell) {
+    return (
+      <button
+        type="button"
+        className="text-left font-medium text-primary transition-colors hover:underline"
+      >
+        {cell.link}
+      </button>
+    );
+  }
+  return <span className="text-foreground">{cell}</span>;
+}
+
+function CustomsTableView({ table }: { table: CustomsTable }) {
+  return (
+    <div className="overflow-x-auto rounded-lg border border-border">
+      <table className="w-full border-collapse text-sm">
+        <thead>
+          <tr className="bg-muted/40 text-left text-xs font-medium text-muted-foreground">
+            {table.columns.map((c, i) => (
+              <th key={i} className="px-4 py-2 font-medium">
+                {c}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {table.rows.map((row, ri) => (
+            <tr key={ri} className="border-t border-border align-top">
+              {row.map((cell, ci) => (
+                <td key={ci} className="px-4 py-3">
+                  <Cell cell={cell} />
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function SubAccordion({ section }: { section: CustomsSection }) {
+  const [open, setOpen] = useState(true);
+  const [noteOpen, setNoteOpen] = useState(false);
+  return (
+    <section className="overflow-hidden rounded-xl border border-border">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        className="flex w-full items-center justify-between gap-3 bg-muted/40 px-4 py-3 text-left transition-colors hover:bg-muted/60"
+      >
+        <h4 className="text-sm font-semibold text-foreground">{section.title}</h4>
+        <ChevronDown
+          className={cn(
+            "h-4 w-4 shrink-0 text-muted-foreground transition-transform",
+            open && "rotate-180"
+          )}
+        />
+      </button>
+      {open && (
+        <div className="flex flex-col gap-4 p-4">
+          {section.tables.length > 0 ? (
+            section.tables.map((t, i) => <CustomsTableView key={i} table={t} />)
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Нет данных по выбранному режиму.
+            </p>
+          )}
+
+          {section.note && section.note.length > 0 && (
+            <div className="overflow-hidden rounded-lg bg-accent/40">
+              <button
+                type="button"
+                onClick={() => setNoteOpen((o) => !o)}
+                className="flex w-full items-center justify-between px-4 py-2 text-sm"
+              >
+                <span className="text-muted-foreground">Примечание</span>
+                <span className="font-medium text-primary">
+                  {noteOpen ? "Скрыть" : "Показать"}
+                </span>
+              </button>
+              {noteOpen && (
+                <ul className="flex flex-col gap-1 px-4 pb-3 text-sm text-foreground">
+                  {section.note.map((n, i) => (
+                    <li key={i}>{n}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </section>
+  );
+}
+
 export function ProductDetail({
   detail,
   onAskAi,
-  onOpenCode,
   dense = false,
 }: {
   detail: ProductDetailType;
@@ -62,12 +181,13 @@ export function ProductDetail({
   /** Компактный режим для узкой панели (ИИ Чат): метрики в 2 колонки. */
   dense?: boolean;
 }) {
-  const path = findTnVedPath(detail.hsCode);
-  const [openIds, setOpenIds] = useState<Set<string>>(() => new Set(["code"]));
-  const [activeTab, setActiveTab] = useState<string>("code");
+  const [openIds, setOpenIds] = useState<Set<string>>(() => new Set(["info"]));
+  const [activeTab, setActiveTab] = useState<string>("info");
+  const [mode, setMode] = useState<"import" | "export">("import");
   const refs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const tag = `«${detail.name}» (${detail.hsCode})`;
+  const customs = mode === "import" ? detail.refImport : detail.refExport;
 
   function toggle(id: string) {
     setOpenIds((prev) => {
@@ -105,9 +225,7 @@ export function ProductDetail({
               <h2 className="mt-3 text-2xl font-bold tracking-tight text-foreground">
                 {detail.name}
               </h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {detail.brief}
-              </p>
+              <p className="mt-1 text-sm text-muted-foreground">{detail.brief}</p>
             </div>
             <Button
               onClick={() =>
@@ -122,16 +240,40 @@ export function ProductDetail({
             </Button>
           </div>
 
-          <div
-            className={cn(
-              "mt-6 grid gap-4",
-              dense ? "grid-cols-2" : "grid-cols-2 sm:grid-cols-4"
-            )}
-          >
-            <StatCard label="Импортная пошлина" value={detail.dutyRate} />
-            <StatCard label="НДС" value={detail.vatRate} />
-            <StatCard label="Акциз" value={detail.excise} />
-            <StatCard label="Единица измерения" value={detail.unit} />
+          {/* Заголовок товара */}
+          <div className="mt-6 rounded-xl border border-border bg-muted/40 p-5">
+            <div
+              className={cn(
+                "grid gap-x-6 gap-y-4",
+                dense
+                  ? "grid-cols-2"
+                  : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-6"
+              )}
+            >
+              <HeaderField label="Единица измерения" value={detail.unit} />
+              <HeaderField
+                label="Дополнительная единица измерения"
+                value={detail.addUnit}
+              />
+              <HeaderField label="Действует с" value={detail.validFrom} />
+              <HeaderField label="Действует до" value={detail.validTo} />
+              <HeaderField label="Группа">
+                <button
+                  type="button"
+                  className="text-left text-sm font-medium text-primary hover:underline"
+                >
+                  {detail.groupNote}
+                </button>
+              </HeaderField>
+              <HeaderField label="Позиция">
+                <button
+                  type="button"
+                  className="text-left text-sm font-medium text-primary hover:underline"
+                >
+                  {detail.positionNote}
+                </button>
+              </HeaderField>
+            </div>
           </div>
         </div>
       </div>
@@ -160,51 +302,57 @@ export function ProductDetail({
       {/* Sections */}
       <div className="px-8 py-6">
         <div className="flex flex-col gap-3">
+          {/* 1. Информация о товаре */}
           <div
             ref={(el) => {
-              refs.current.code = el;
+              refs.current.info = el;
             }}
             className="scroll-mt-20"
           >
             <SectionCard
-              icon={SquareStack}
-              title="Справка по коду"
+              icon={FileText}
+              title="Информация о товаре"
               {...sectionProps(
-                "code",
-                `Дай справку по коду ТН ВЭД ${detail.hsCode} для ${tag}: пошлины, НДС, ограничения, маркировка.`
+                "info",
+                `Дай справку по товару ${tag}: тарифные меры, преференции, НДС, запреты и ограничения.`
               )}
             >
-              <div className="flex flex-col gap-6">
-                <LabeledBlock title="Описание товара">
-                  <p className="text-sm leading-5 text-foreground">
-                    {detail.description}
-                  </p>
-                </LabeledBlock>
-                <KeyValueList
-                  rows={[
-                    { label: "Единицы измерения", value: detail.unit },
-                    { label: "Пошлины", value: detail.dutyRate },
-                    { label: "НДС", value: detail.vatRate },
-                    { label: "Акцизы", value: detail.excise },
-                  ]}
-                />
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                  <LabeledBlock title="Ограничения">
-                    <BulletList items={detail.restrictions} />
-                  </LabeledBlock>
-                  <LabeledBlock title="Разрешения">
-                    <BulletList items={detail.permits} />
-                  </LabeledBlock>
+              <div className="flex flex-col gap-5">
+                {/* Переключатель режима */}
+                <div className="flex w-fit max-w-full flex-wrap items-center gap-1 rounded-2xl bg-muted p-1">
+                  {(
+                    [
+                      ["import", "Выпуск для внутреннего потребления"],
+                      ["export", "Экспорт"],
+                    ] as const
+                  ).map(([id, label]) => (
+                    <button
+                      key={id}
+                      type="button"
+                      onClick={() => setMode(id)}
+                      className={cn(
+                        "h-8 rounded-xl px-4 text-sm font-semibold transition-colors",
+                        mode === id
+                          ? "bg-card text-foreground shadow-sm"
+                          : "text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      {label}
+                    </button>
+                  ))}
                 </div>
-                <LabeledBlock title="Маркировка">
-                  <p className="text-sm leading-5 text-foreground">
-                    {detail.labeling}
-                  </p>
-                </LabeledBlock>
+
+                {/* Подразделы справки */}
+                <div className="flex flex-col gap-3">
+                  {customs.map((s) => (
+                    <SubAccordion key={s.id} section={s} />
+                  ))}
+                </div>
               </div>
             </SectionCard>
           </div>
 
+          {/* 2. Санкционные ограничения */}
           <div
             ref={(el) => {
               refs.current.sanctions = el;
@@ -235,6 +383,7 @@ export function ProductDetail({
             </SectionCard>
           </div>
 
+          {/* 3. ВЭД по товару */}
           <div
             ref={(el) => {
               refs.current.trade = el;
@@ -292,6 +441,7 @@ export function ProductDetail({
             </SectionCard>
           </div>
 
+          {/* 4. Международный рынок и тарифы */}
           <div
             ref={(el) => {
               refs.current.market = el;
@@ -340,83 +490,7 @@ export function ProductDetail({
               </div>
             </SectionCard>
           </div>
-
-          {/* 5. Дерево ТН ВЭД — ветка товара */}
-          <div
-            ref={(el) => {
-              refs.current.tree = el;
-            }}
-            className="scroll-mt-20"
-          >
-            <SectionCard
-              icon={ListTree}
-              title="Дерево ТН ВЭД"
-              {...sectionProps(
-                "tree",
-                `Покажи положение кода ${detail.hsCode} в дереве ТН ВЭД и соседние позиции.`
-              )}
-            >
-              {path.length > 0 ? (
-                <ol className="flex flex-col">
-                  {path.map((n, i) => {
-                    const isLast = i === path.length - 1;
-                    const label = n.label ?? n.code;
-                    return (
-                      <li
-                        key={i}
-                        className="relative flex gap-3 pb-3 last:pb-0"
-                        style={{ marginLeft: `${i * 16}px` }}
-                      >
-                        {!isLast && (
-                          <span className="absolute left-3 top-7 h-full w-px bg-border" />
-                        )}
-                        <span
-                          className={cn(
-                            "relative flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold",
-                            isLast
-                              ? "bg-primary text-primary-foreground"
-                              : "bg-muted text-muted-foreground"
-                          )}
-                        >
-                          {i + 1}
-                        </span>
-                        <div className="flex min-w-0 flex-1 flex-col">
-                          <div className="flex flex-wrap items-center gap-2">
-                            {label && (
-                              <span className="rounded-md bg-muted px-2 py-1 font-mono text-xs font-bold text-foreground">
-                                {label}
-                              </span>
-                            )}
-                            {isLast && (
-                              <span className="rounded-md bg-accent px-2 py-1 font-mono text-xs font-bold text-primary">
-                                {detail.hsCode}
-                              </span>
-                            )}
-                          </div>
-                          <span
-                            className={cn(
-                              "mt-1 text-sm",
-                              isLast
-                                ? "font-semibold text-foreground"
-                                : "text-muted-foreground"
-                            )}
-                          >
-                            {n.title}
-                          </span>
-                        </div>
-                      </li>
-                    );
-                  })}
-                </ol>
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  Положение в дереве ТН ВЭД недоступно для этого кода.
-                </p>
-              )}
-            </SectionCard>
-          </div>
         </div>
-
       </div>
     </div>
   );
